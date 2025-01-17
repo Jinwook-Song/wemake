@@ -1,5 +1,6 @@
+import { Button } from '~/components/ui/button';
 import type { Route } from './+types/home';
 
 export default function Home() {
-  return <div>Home</div>;
+  return <Button>Click me</Button>;
 }
