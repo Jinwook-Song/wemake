@@ -9,6 +9,9 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.1.5",
+    "@radix-ui/react-navigation-menu": "^1.2.4",
+    "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@react-router/node": "^7.1.1",
     "@react-router/serve": "^7.1.1",
