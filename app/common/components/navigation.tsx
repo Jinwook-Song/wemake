@@ -10,6 +10,25 @@ import {
   navigationMenuTriggerStyle,
 } from './ui/navigation-menu';
 import { cn } from '~/lib/utils';
+import { Button } from './ui/button';
+import {
+  DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+} from './ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import {
+  BarChart3Icon,
+  BellIcon,
+  LogOutIcon,
+  MessageCircleIcon,
+  SettingsIcon,
+  UserIcon,
+} from 'lucide-react';
 
 const menus = [
   {
@@ -122,9 +141,17 @@ const menus = [
   },
 ];
 
-export default function Navigation() {
+export default function Navigation({
+  isLoggedIn,
+  hasNotifications,
+  hasMessages,
+}: {
+  isLoggedIn: boolean;
+  hasNotifications: boolean;
+  hasMessages: boolean;
+}) {
   return (
-    <nav className='flex px-20 h-16 items-center justify-between backdrop-blur fixed top-0 left-0 ring-0 z-50 bg-black/50'>
+    <nav className='flex px-20 h-16 items-center justify-between backdrop-blur fixed top-0 left-0 ring-0 z-50 bg-black/50 w-full'>
       <div className='flex items-center'>
         <Link to='/' className='font-bold tracking-tighter text-lg'>
           wemake
@@ -146,9 +173,8 @@ export default function Navigation() {
                             key={item.name}
                             className={cn([
                               'select-none rounded-md transition-colors hover:bg-accent focus:bg-accent',
-                              item.to === '/products/promote' &&
-                                'col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20',
-                              item.to === '/jobs/submit' &&
+                              (item.to === '/products/promote' ||
+                                item.to === '/jobs/submit') &&
                                 'col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20',
                             ])}
                           >
@@ -180,6 +206,77 @@ export default function Navigation() {
           </NavigationMenuList>
         </NavigationMenu>
       </div>
+      {isLoggedIn ? (
+        <div className='flex items-center gap-2'>
+          <Button size={'icon'} variant={'ghost'} asChild className='relative'>
+            <Link to='/my/notifications'>
+              <BellIcon className='size-4' />
+              {hasNotifications && (
+                <div className='absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full' />
+              )}
+            </Link>
+          </Button>
+          <Button size={'icon'} variant={'ghost'} asChild className='relative'>
+            <Link to='/my/messages'>
+              <MessageCircleIcon className='size-4' />
+              {hasMessages && (
+                <div className='absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full' />
+              )}
+            </Link>
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className='cursor-pointer'>
+              <Avatar>
+                <AvatarImage src='https://github.com/jinwook-song.png' />
+                <AvatarFallback>J</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-56'>
+              <DropdownMenuLabel className='flex flex-col'>
+                <span className='font-medium'>John Doe</span>
+                <span className='text-xs text-muted-foreground'>@username</span>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link to='/my/dashboard'>
+                    <BarChart3Icon className='size-4 mr-2' />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link to='/my/profile'>
+                    <UserIcon className='size-4 mr-2' />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link to='/my/profile'>
+                    <SettingsIcon className='size-4 mr-2' />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild className='cursor-pointer'>
+                <Link to='/auth/logout'>
+                  <LogOutIcon className='size-4 mr-2' />
+                  Logout
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ) : (
+        <div className='flex items-center gap-2'>
+          <Button asChild variant='outline'>
+            <Link to='/auth/login'>Login</Link>
+          </Button>
+          <Button asChild variant='default'>
+            <Link to='/auth/join'>Join</Link>
+          </Button>
+        </div>
+      )}
     </nav>
   );
 }
