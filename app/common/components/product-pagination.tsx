@@ -15,11 +15,13 @@ type ProductPaginationProps = {
 
 export function ProductPagination({ totalPages }: ProductPaginationProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page')) ?? 1;
+  const page = Number(searchParams.get('page') ?? 1);
 
   // 기존 파라미터를 유지하면서 페이지 번호를 변경
-  const onClick = (page: number) => {
-    searchParams.set('page', page.toString());
+  const onClick = (targetPage: number) => {
+    if (page === targetPage) return;
+
+    searchParams.set('page', targetPage.toString());
     setSearchParams(searchParams, {
       preventScrollReset: false,
     });
