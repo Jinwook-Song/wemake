@@ -1,9 +1,10 @@
-import type { Route } from '~/types';
-import type { MetaFunction } from 'react-router';
+import { Hero } from '~/common/components/hero';
+import type { Route } from './+types/categories-page';
+import { CategoryCard } from '../components/category-card';
 
-export const meta: MetaFunction = () => {
+export const meta: Route.MetaFunction = () => {
   return [
-    { title: 'Categories | Product Hunt Clone' },
+    { title: 'Categories | wemake' },
     { name: 'description', content: 'Browse products by category' },
   ];
 };
@@ -18,9 +19,18 @@ export default function CategoriesPage({ loaderData }: Route.ComponentProps) {
   const { categories } = loaderData;
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-6'>Categories</h1>
-      {/* Categories grid will be rendered here */}
-    </main>
+    <div className='space-y-10'>
+      <Hero title='Categories' description='Browse products by category' />
+      <div className='grid grid-cols-4 gap-10'>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <CategoryCard
+            key={index}
+            id={`category-${index}`}
+            name={`Category ${index}`}
+            description={`Category ${index} Description`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
