@@ -1,6 +1,11 @@
 import { DateTime } from 'luxon';
 import type { Route } from './+types/monthly-leaderboards-page';
-import { data, isRouteErrorResponse, Link } from 'react-router';
+import {
+  data,
+  isRouteErrorResponse,
+  Link,
+  type MetaFunction,
+} from 'react-router';
 import { z } from 'zod';
 import { Hero } from '~/common/components/hero';
 import { ProductCard } from '../components/product-card';
@@ -11,6 +16,23 @@ const paramsSchema = z.object({
   year: z.coerce.number(),
   month: z.coerce.number(),
 });
+
+export const meta: MetaFunction = ({ params }) => {
+  const date = DateTime.fromObject({
+    year: Number(params.year),
+    month: Number(params.month),
+  })
+    .setZone('Asia/Seoul')
+    .setLocale('ko-KR');
+  return [
+    {
+      title: `Best of ${date.toLocaleString({
+        year: '2-digit',
+        month: 'long',
+      })} | wemake`,
+    },
+  ];
+};
 
 export function loader({ params }: Route.LoaderArgs) {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
