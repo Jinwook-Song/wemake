@@ -1,11 +1,6 @@
 import { DateTime } from 'luxon';
 import type { Route } from './+types/monthly-leaderboards-page';
-import {
-  data,
-  isRouteErrorResponse,
-  Link,
-  type MetaFunction,
-} from 'react-router';
+import { data, isRouteErrorResponse, Link } from 'react-router';
 import { z } from 'zod';
 import { Hero } from '~/common/components/hero';
 import { ProductCard } from '../components/product-card';
@@ -17,7 +12,7 @@ const paramsSchema = z.object({
   month: z.coerce.number(),
 });
 
-export const meta: MetaFunction = ({ params }) => {
+export const meta: Route.MetaFunction = ({ params }) => {
   const date = DateTime.fromObject({
     year: Number(params.year),
     month: Number(params.month),
