@@ -19,7 +19,7 @@ export function InputPair({
     <div className='flex flex-col gap-2'>
       <Label htmlFor={rest.id} className='flex flex-col gap-1'>
         {label}
-        <small>{description}</small>
+        <small className='text-muted-foreground'>{description}</small>
       </Label>
       {textArea ? (
         <Textarea {...rest} rows={rows} className='resize-none' />
