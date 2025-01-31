@@ -8,7 +8,7 @@ export default function ProductOverviewLayout() {
     <div className='space-y-10'>
       <div className='flex justify-between'>
         <div className='flex gap-8'>
-          <div className='size-40 rounded-xl shadow-xl bg-primary/50'></div>
+          <div className='size-40 rounded-xl shadow-xl bg-primary/50 shrink-0'></div>
           <div>
             <h1 className='text-5xl font-semibold'>Product Name</h1>
             <p className='text-2xl font-light'>Product Description</p>
