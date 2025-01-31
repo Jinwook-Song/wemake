@@ -1,29 +1,38 @@
-import type { Route } from './+types/product-reviews-page';
+import { Button } from '~/common/components/ui/button';
+import { ReviewCard } from '../components/review-card';
 
-export function loader({ params }: Route.LoaderArgs) {
-  return {
-    reviews: [
-      // ... 리뷰 데이터를 가져오는 로직
-    ],
-  };
-}
-
-export function meta({ params }: Route.MetaArgs) {
+export function meta() {
   return [
-    { title: `제품 리뷰 - ${params.productId}` },
-    { name: 'description', content: '제품에 대한 사용자 리뷰를 확인하세요' },
+    { title: 'Product Reviews | wemake' },
+    { name: 'description', content: 'Check out user reviews for this product' },
   ];
 }
 
-export default function ProductReviewsPage({
-  loaderData,
-}: Route.ComponentProps) {
-  const { reviews } = loaderData;
-
+export default function ProductReviewsPage() {
   return (
-    <div>
-      <h1>제품 리뷰</h1>
-      {/* 리뷰 목록 렌더링 */}
+    <div className='space-y-10 max-w-lg'>
+      <div className='flex justify-between items-center'>
+        <h2 className='text-2xl font-bold'>10 Reviews</h2>
+        <Button variant={'secondary'}>Write a Review</Button>
+      </div>
+      <div className='space-y-20'>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <ReviewCard
+            key={index}
+            avatarUrl='https://github.com/openai.png'
+            username='John Doe'
+            handle='username'
+            rating={((index * 3) % 5) + 1}
+            content='Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
+            voluptates, quod, quia, voluptate quae voluptatibus quibusdam
+            voluptatem quas quidem quos? Quisquam, voluptates. Quisquam
+            voluptates, quod, quia, voluptate quae voluptatibus quibusdam
+            voluptatem quas quidem quos? Quisquam, voluptates. Lorem ipsum dolor
+            sit amet consectetur adipisicing elit.'
+            createdAt='10 days ago'
+          />
+        ))}
+      </div>
     </div>
   );
 }
