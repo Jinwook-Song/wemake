@@ -2,16 +2,13 @@ import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/submit-page';
 import { Form } from 'react-router';
 import { InputPair } from '~/common/components/input-pair';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '~/common/components/ui/select';
 import { SelectPair } from '~/common/components/select-pair';
+import { Input } from '~/common/components/ui/input';
+import { Label } from '~/common/components/ui/label';
+import { useState } from 'react';
+import { Button } from '~/common/components/ui/button';
+import { cn } from '~/lib/utils';
+import { PlusIcon } from 'lucide-react';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -21,6 +18,12 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function SubmitPage() {
+  const [logo, setLogo] = useState<string | null>(null);
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setLogo(URL.createObjectURL(file));
+  };
+
   return (
     <div>
       <Hero
@@ -79,6 +82,51 @@ export default function SubmitPage() {
               { value: 'development', label: 'Development' },
             ]}
           />
+          <Button type='submit' size={'lg'} className='w-full'>
+            Submit
+          </Button>
+        </div>
+        <div className='flex flex-col gap-2'>
+          <Label htmlFor='logo' className='flex flex-col gap-1'>
+            Logo
+            <small className='text-muted-foreground'>
+              The logo of your product
+            </small>
+            <div
+              className={cn(
+                'size-40 rounded-xl shadow-xl overflow-hidden border flex items-center justify-center',
+                !logo && 'border-dashed',
+              )}
+            >
+              {logo ? (
+                <img
+                  src={logo}
+                  alt='logo'
+                  className='object-cover w-full h-full'
+                />
+              ) : (
+                <PlusIcon size={20} width={16} />
+              )}
+            </div>
+          </Label>
+          <Input
+            id='logo'
+            name='logo'
+            type='file'
+            accept='image/*'
+            className='hidden'
+            required
+            onChange={onChange}
+          />
+          <div className='flex flex-col'>
+            <span className='text-muted-foreground'>
+              Recommanded size: 128x128px
+            </span>
+            <span className='text-muted-foreground'>
+              Allowed formats: png, jpg, jpeg
+            </span>
+            <span className='text-muted-foreground'>Max file size: 1MB</span>
+          </div>
         </div>
       </Form>
     </div>

@@ -60,7 +60,7 @@ export default function HomePage() {
             id='postId'
             title='What is the best productivity tool?'
             author='Jinwook'
-            authorAvatarUrl='https://github.com/apple.png'
+            authorAvatarUrl='https://github.com/google.png'
             category='Productivity'
             createdAt='12 hours ago'
           />
