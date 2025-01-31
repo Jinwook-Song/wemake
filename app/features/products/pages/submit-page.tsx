@@ -94,7 +94,7 @@ export default function SubmitPage() {
             </small>
             <div
               className={cn(
-                'size-40 rounded-xl shadow-xl overflow-hidden border flex items-center justify-center',
+                'size-40 rounded-xl shadow-xl overflow-hidden border flex items-center justify-center cursor-pointer',
                 !logo && 'border-dashed',
               )}
             >

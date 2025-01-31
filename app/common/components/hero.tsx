@@ -1,6 +1,6 @@
 interface HeroProps {
   title: string;
-  description: string;
+  description?: string;
 }
 
 export function Hero({ title, description }: HeroProps) {
