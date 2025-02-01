@@ -11,7 +11,8 @@ import {
   AvatarImage,
 } from '~/common/components/ui/avatar';
 import { Button } from '~/common/components/ui/button';
-import { DotIcon } from 'lucide-react';
+import { ChevronUpIcon, DotIcon } from 'lucide-react';
+import { cn } from '~/lib/utils';
 
 interface PostCardProps {
   id: string;
@@ -20,6 +21,8 @@ interface PostCardProps {
   authorAvatarUrl?: string;
   category: string;
   createdAt: string;
+  expanded?: boolean;
+  votesCount?: number;
 }
 
 export function PostCard({
@@ -29,10 +32,17 @@ export function PostCard({
   authorAvatarUrl,
   category,
   createdAt,
+  expanded = false,
+  votesCount = 0,
 }: PostCardProps) {
   return (
     <Link to={`/community/${id}`}>
-      <Card className='bg-transparent hover:bg-card/50 transition-colors'>
+      <Card
+        className={cn(
+          'bg-transparent hover:bg-card/50 transition-colors',
+          expanded && 'flex flex-row justify-between items-center',
+        )}
+      >
         <CardHeader className='flex flex-row items-center gap-2'>
           <Avatar className='size-14'>
             <AvatarFallback>{author}</AvatarFallback>
@@ -49,11 +59,19 @@ export function PostCard({
             </div>
           </div>
         </CardHeader>
-        <CardFooter className='flex justify-end'>
-          <Button variant={'link'} asChild>
-            Reply &rarr;
-          </Button>
-        </CardFooter>
+        {!expanded && (
+          <CardFooter className='flex justify-end'>
+            <Button variant={'link'}>Reply &rarr;</Button>
+          </CardFooter>
+        )}
+        {expanded && (
+          <CardFooter className='flex justify-end py-0'>
+            <Button variant={'outline'} className='flex flex-col h-14'>
+              <ChevronUpIcon className='size-4 shrink-0' />
+              <span>{votesCount}</span>
+            </Button>
+          </CardFooter>
+        )}
       </Card>
     </Link>
   );
