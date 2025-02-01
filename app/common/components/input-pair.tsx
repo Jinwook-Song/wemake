@@ -3,6 +3,12 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 
+/**
+ * InputPair component
+ * @param required label, description
+ * @param optional textArea, rows
+ * @returns
+ */
 export function InputPair({
   label,
   description,
