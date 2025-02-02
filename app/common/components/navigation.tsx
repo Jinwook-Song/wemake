@@ -251,7 +251,7 @@ export default function Navigation({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className='cursor-pointer'>
-                  <Link to='/my/profile'>
+                  <Link to='/my/settings'>
                     <SettingsIcon className='size-4 mr-2' />
                     Settings
                   </Link>

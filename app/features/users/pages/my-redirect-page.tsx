@@ -1,12 +1,5 @@
-import type { Route } from './+types/my-redirect-page';
+import { redirect } from 'react-router';
 
-export const meta: Route.MetaFunction = () => {
-  return [
-    { title: 'Redirecting... | wemake' },
-    { name: 'description', content: 'Redirecting to dashboard' },
-  ];
+export const loader = () => {
+  return redirect(`/my/dashboard`);
 };
-
-export default function MyRedirectPage({}: Route.ComponentProps) {
-  return <div></div>;
-}

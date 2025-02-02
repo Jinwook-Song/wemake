@@ -1,12 +1,7 @@
+import { redirect } from 'react-router';
 import type { Route } from './+types/my-profile-page';
 
-export const meta: Route.MetaFunction = () => {
-  return [
-    { title: 'My Profile | wemake' },
-    { name: 'description', content: 'View and edit your profile' },
-  ];
+export const loader = () => {
+  // find user using the cookies
+  return redirect(`/users/jinwook`);
 };
-
-export default function MyProfilePage({}: Route.ComponentProps) {
-  return <div></div>;
-}
