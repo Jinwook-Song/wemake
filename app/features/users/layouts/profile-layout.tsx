@@ -103,7 +103,9 @@ export default function ProfileLayout({}: Route.ComponentProps) {
           </NavLink>
         ))}
       </div>
-      <Outlet />
+      <div className='max-w-screen-md'>
+        <Outlet />
+      </div>
     </div>
   );
 }

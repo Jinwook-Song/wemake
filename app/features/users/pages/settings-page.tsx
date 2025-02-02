@@ -51,6 +51,16 @@ export default function SettingsPage({}: Route.ComponentProps) {
               required
             />
             <InputPair
+              id='headline'
+              name='headline'
+              label='Headline'
+              description='An introduction to your profile'
+              placeholder='I am a software engineer...'
+              type='text'
+              required
+              textArea
+            />
+            <InputPair
               id='bio'
               name='bio'
               label='Bio'
