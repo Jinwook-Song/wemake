@@ -25,9 +25,9 @@ export const meta: Route.MetaFunction = () => {
 
 export default function MessagePage({}: Route.ComponentProps) {
   return (
-    <div className='h-full flex flex-col'>
-      <Card>
-        <CardHeader className='flex flex-row gap-4 items-center'>
+    <div className='h-full flex flex-col relative'>
+      <Card className='absolute w-full top-0 bg-card/50 z-10 backdrop-blur'>
+        <CardHeader className='flex flex-row gap-4 items-center bg-transparent'>
           <Avatar className='size-14'>
             <AvatarFallback>J</AvatarFallback>
             <AvatarImage src='https://github.com/jinwook-song.png' />
@@ -38,7 +38,7 @@ export default function MessagePage({}: Route.ComponentProps) {
           </div>
         </CardHeader>
       </Card>
-      <div className='overflow-y-auto pt-10 flex flex-col gap-4 grow'>
+      <div className='overflow-y-auto pt-10 flex flex-col gap-4 grow mt-20'>
         {Array.from({ length: 19 }).map((_, index) => (
           <MessageBubble
             key={index}
