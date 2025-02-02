@@ -9,7 +9,7 @@ export default function AuthButtons() {
       <div className='w-full flex items-center gap-2'>
         <Separator className='grow shrink' />
         <span className='text-sm text-muted-foreground font-light text-nowrap'>
-          Or
+          Or continue with
         </span>
         <Separator className='grow shrink' />
       </div>
