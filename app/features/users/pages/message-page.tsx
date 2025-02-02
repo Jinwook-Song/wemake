@@ -8,5 +8,5 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function MessagePage({}: Route.ComponentProps) {
-  return <div></div>;
+  return <div>MessagePage</div>;
 }
