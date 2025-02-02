@@ -63,7 +63,7 @@ export default function DashboardLayout({}: Route.ComponentProps) {
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-      <div className='h-full flex-1'>
+      <div className='h-full flex-1 overflow-y-auto'>
         <Outlet />
       </div>
     </SidebarProvider>
