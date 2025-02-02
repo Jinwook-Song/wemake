@@ -44,7 +44,7 @@ export default function ProductOverviewLayout() {
               'h-9',
             )
           }
-          to={`/products/${1}/overview`}
+          to={`/products/productId/overview`}
         >
           Overview
         </NavLink>
@@ -55,7 +55,7 @@ export default function ProductOverviewLayout() {
               'h-9',
             )
           }
-          to={`/products/${1}/reviews`}
+          to={`/products/productId/reviews`}
         >
           Reviews
         </NavLink>
