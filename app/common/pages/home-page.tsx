@@ -15,7 +15,7 @@ export const meta: MetaFunction = () => {
 
 export default function HomePage() {
   return (
-    <div className='px-20 space-y-40'>
+    <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
         <div>
           <h2 className='text-5xl font-bold leading-tight tracking-tight'>

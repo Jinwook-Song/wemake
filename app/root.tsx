@@ -52,7 +52,7 @@ export default function App() {
   const { pathname } = useLocation();
   const isAuthenticating = pathname.startsWith('/auth');
   return (
-    <div className={cn(!isAuthenticating && 'px-20 py-28')}>
+    <div className={cn(!isAuthenticating && 'px-5 sm:px-20 py-28')}>
       {!isAuthenticating && (
         <Navigation
           isLoggedIn={true}
