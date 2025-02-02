@@ -84,12 +84,14 @@ export default [
   ...prefix('/my', [
     index('features/users/pages/my-redirect-page.tsx'),
     ...prefix('/dashboard', [
-      index('features/users/pages/dashboard-page.tsx'),
-      route('/ideas', 'features/users/pages/dashboard-ideas-page.tsx'),
-      route(
-        '/products/:productId',
-        'features/users/pages/dashboard-product-page.tsx',
-      ),
+      layout('features/users/layouts/dashboard-layout.tsx', [
+        index('features/users/pages/dashboard-page.tsx'),
+        route('/ideas', 'features/users/pages/dashboard-ideas-page.tsx'),
+        route(
+          '/products/:productId',
+          'features/users/pages/dashboard-product-page.tsx',
+        ),
+      ]),
     ]),
     route('/profile', 'features/users/pages/my-profile-page.tsx'),
     route('/settings', 'features/users/pages/settings-page.tsx'),

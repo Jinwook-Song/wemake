@@ -8,5 +8,5 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function DashboardProductPage({}: Route.ComponentProps) {
-  return <div></div>;
+  return <div>Dashboard Product</div>;
 }
