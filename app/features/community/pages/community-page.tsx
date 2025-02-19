@@ -12,6 +12,7 @@ import { ChevronDownIcon } from 'lucide-react';
 import { PERIOD_OPTIONS, SORT_OPTIONS } from '../constants';
 import { Input } from '~/common/components/ui/input';
 import { PostCard } from '../components/post-card';
+import { getTopics } from '../queries';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -24,7 +25,12 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function CommunityPage({}: Route.ComponentProps) {
+export const loader = async () => {
+  const topics = await getTopics();
+  return { topics };
+};
+
+export default function CommunityPage({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const sorting =
     (searchParams.get('sorting') as (typeof SORT_OPTIONS)[number]) || 'newest';
@@ -121,14 +127,14 @@ export default function CommunityPage({}: Route.ComponentProps) {
             Topics
           </h2>
           <div className='flex flex-col items-start gap-4'>
-            {[
-              'AI Tools',
-              'Dev Tools',
-              'Productivity Tools',
-              'Design Tools',
-            ].map((item) => (
-              <Button key={item} variant={'link'} className='px-0' asChild>
-                <Link to={`/community?topic=${item}`}>{item}</Link>
+            {loaderData.topics.map((topic) => (
+              <Button
+                key={topic.slug}
+                variant={'link'}
+                className='px-0'
+                asChild
+              >
+                <Link to={`/community?topic=${topic.slug}`}>{topic.name}</Link>
               </Button>
             ))}
           </div>
