@@ -18,10 +18,10 @@ import { DateTime } from 'luxon';
 interface PostCardProps {
   id: number;
   title: string;
-  author: String;
+  author: string;
   authorAvatarUrl: string | null;
   category: string;
-  createdAt: Date;
+  createdAt: string;
   expanded?: boolean;
   votesCount?: number;
 }
@@ -56,7 +56,7 @@ export function PostCard({
                 {author} on {category}
               </span>
               <DotIcon className='size-4' />
-              <span>{DateTime.fromJSDate(createdAt).toRelative()}</span>
+              <span>{DateTime.fromISO(createdAt).toRelative()}</span>
             </div>
           </div>
         </CardHeader>
