@@ -314,6 +314,13 @@ export type Database = {
             foreignKeyName: "notifications_post_id_posts_post_id_fk"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "community_post_list_view"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_posts_post_id_fk"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["post_id"]
           },
@@ -380,6 +387,13 @@ export type Database = {
             foreignKeyName: "post_replies_post_id_posts_post_id_fk"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "community_post_list_view"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_replies_post_id_posts_post_id_fk"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["post_id"]
           },
@@ -409,6 +423,13 @@ export type Database = {
           profile_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "post_upvotes_post_id_posts_post_id_fk"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_list_view"
+            referencedColumns: ["post_id"]
+          },
           {
             foreignKeyName: "post_upvotes_post_id_posts_post_id_fk"
             columns: ["post_id"]
@@ -712,7 +733,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      community_post_list_view: {
+        Row: {
+          author: string | null
+          avatar: string | null
+          created_at: string | null
+          post_id: number | null
+          slug: string | null
+          title: string | null
+          topic: string | null
+          upvotes: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
