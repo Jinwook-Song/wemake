@@ -1,38 +1,31 @@
-import client from '~/supa-client';
-
-export const getTopics = async () => {
-  const { data, error } = await client.from('topics').select('name, slug');
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-export const getPosts = async () => {
-  const { data, error } = await client
-    .from('community_post_list_view')
-    .select('*');
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-// export const getPosts = async () => {
-//   const { data, error } = await client.from('posts').select(`
-//       post_id,
-//       title,
-//       created_at,
-//       topic:topics!inner (
-//       name
-//       ),
-//       author:profiles!posts_profile_id_profiles_profile_id_fk!inner (
-//       name,
-//       avatar,
-//       username
-//       ),
-//       upvotes: post_upvotes (count)
-//       `);
-//   console.log(error);
-//   if (error) throw new Error(error.message);
-//   return data;
-// };
+CREATE VIEW community_post_list_view AS
+SELECT
+    p.post_id,
+    p.title,
+    p.created_at,
+    t.name AS topic,
+    t.slug,
+    pr.name AS author,
+    pr.avatar AS avatar,
+    pr.username AS username,
+    COUNT(pu.post_id) AS upvotes
+FROM
+    posts p
+INNER JOIN
+    topics t USING (topic_id)
+INNER JOIN
+    profiles pr USING (profile_id)
+LEFT JOIN
+    post_upvotes pu USING (post_id)
+GROUP BY
+    p.post_id,
+    p.title,
+    p.created_at,
+    t.name,
+    t.slug,
+    pr.name,
+    pr.avatar,
+    pr.username;
 
 /** Community Queries with Drizzle
  * 
