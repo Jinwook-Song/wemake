@@ -1,6 +1,6 @@
 import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/community-page';
-import { Form, Link, useSearchParams } from 'react-router';
+import { Await, Form, Link, useSearchParams } from 'react-router';
 import { Button } from '~/common/components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import { PERIOD_OPTIONS, SORT_OPTIONS } from '../constants';
 import { Input } from '~/common/components/ui/input';
 import { PostCard } from '../components/post-card';
 import { getPosts, getTopics } from '../queries';
+import { Suspense } from 'react';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -26,11 +27,13 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export const loader = async () => {
-  const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
+  const topics = getTopics();
+  const posts = getPosts();
   return { topics, posts };
 };
 
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
+  const { topics, posts } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
   const sorting =
     (searchParams.get('sorting') as (typeof SORT_OPTIONS)[number]) || 'newest';
@@ -107,38 +110,52 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
               <Link to='/community/submit'>Create a discussion</Link>
             </Button>
           </div>
-          <div className='flex flex-col gap-10'>
-            {loaderData.posts.map((post) => (
-              <PostCard
-                key={post.post_id}
-                id={post.post_id}
-                title={post.title}
-                author={post.author}
-                authorAvatarUrl={post.avatar}
-                category={post.topic}
-                createdAt={post.created_at}
-                votesCount={post.upvotes}
-                expanded
-              />
-            ))}
-          </div>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Await resolve={posts}>
+              {(posts) => (
+                <div className='flex flex-col gap-10'>
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.post_id}
+                      id={post.post_id}
+                      title={post.title}
+                      author={post.author}
+                      authorAvatarUrl={post.avatar}
+                      category={post.topic}
+                      createdAt={post.created_at}
+                      votesCount={post.upvotes}
+                      expanded
+                    />
+                  ))}
+                </div>
+              )}
+            </Await>
+          </Suspense>
         </div>
         <aside className='col-span-2 space-y-8'>
           <h2 className='text-sm font-bold text-muted-foreground uppercase'>
             Topics
           </h2>
-          <div className='flex flex-col items-start gap-4'>
-            {loaderData.topics.map((topic) => (
-              <Button
-                key={topic.slug}
-                variant={'link'}
-                className='px-0'
-                asChild
-              >
-                <Link to={`/community?topic=${topic.slug}`}>{topic.name}</Link>
-              </Button>
-            ))}
-          </div>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Await resolve={topics}>
+              {(topics) => (
+                <div className='flex flex-col items-start gap-4'>
+                  {topics.map((topic) => (
+                    <Button
+                      key={topic.slug}
+                      variant={'link'}
+                      className='px-0'
+                      asChild
+                    >
+                      <Link to={`/community?topic=${topic.slug}`}>
+                        {topic.name}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </Await>
+          </Suspense>
         </aside>
       </div>
     </div>
