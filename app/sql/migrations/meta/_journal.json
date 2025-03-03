@@ -64,6 +64,13 @@
       "when": 1740133670858,
       "tag": "0008_chubby_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1741013381819,
+      "tag": "0009_solid_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

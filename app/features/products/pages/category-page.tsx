@@ -28,9 +28,9 @@ export default function CategoryPage() {
             id='productId'
             name='Product Name'
             description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            reviewsCount={'12'}
+            viewsCount={'12'}
+            upvotesCount={'120'}
           />
         ))}
       </div>

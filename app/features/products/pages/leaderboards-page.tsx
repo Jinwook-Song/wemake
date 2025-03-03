@@ -3,6 +3,8 @@ import type { Route } from './+types/leaderboards-page';
 import { Hero } from '~/common/components/hero';
 import { Link } from 'react-router';
 import { ProductCard } from '../components/product-card';
+import { getProductsByDateRnage } from '../queries';
+import { DateTime } from 'luxon';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -14,7 +16,50 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function LeaderboardsPage() {
+export const loader = async () => {
+  const dailyProductsPromise = getProductsByDateRnage({
+    startDate: DateTime.now().startOf('day'),
+    endDate: DateTime.now().endOf('day'),
+    limit: 7,
+  });
+
+  const weeklyProductsPromise = getProductsByDateRnage({
+    startDate: DateTime.now().startOf('week'),
+    endDate: DateTime.now().endOf('week'),
+    limit: 7,
+  });
+
+  const monthlyProductsPromise = getProductsByDateRnage({
+    startDate: DateTime.now().startOf('month'),
+    endDate: DateTime.now().endOf('month'),
+    limit: 7,
+  });
+
+  const yearlyProductsPromise = getProductsByDateRnage({
+    startDate: DateTime.now().startOf('year'),
+    endDate: DateTime.now().endOf('year'),
+    limit: 7,
+  });
+
+  const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] =
+    await Promise.all([
+      dailyProductsPromise,
+      weeklyProductsPromise,
+      monthlyProductsPromise,
+      yearlyProductsPromise,
+    ]);
+
+  return {
+    dailyProducts,
+    weeklyProducts,
+    monthlyProducts,
+    yearlyProducts,
+  };
+};
+
+export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
+  const { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts } =
+    loaderData;
   return (
     <div className='space-y-20'>
       <Hero
@@ -30,15 +75,15 @@ export default function LeaderboardsPage() {
             The most popular products made by our community today.
           </p>
         </div>
-        {Array.from({ length: 7 }).map((_, index) => (
+        {dailyProducts.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            key={product.product_id}
+            id={`productId-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
         <Button variant={'link'} asChild className='text-lg self-center'>
@@ -56,15 +101,15 @@ export default function LeaderboardsPage() {
             The most popular products made by our community this week.
           </p>
         </div>
-        {Array.from({ length: 7 }).map((_, index) => (
+        {weeklyProducts.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            key={product.product_id}
+            id={`productId-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
         <Button variant={'link'} asChild className='text-lg self-center'>
@@ -82,15 +127,15 @@ export default function LeaderboardsPage() {
             The most popular products made by our community this month.
           </p>
         </div>
-        {Array.from({ length: 7 }).map((_, index) => (
+        {monthlyProducts.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            key={product.product_id}
+            id={`productId-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
         <Button variant={'link'} asChild className='text-lg self-center'>
@@ -108,15 +153,15 @@ export default function LeaderboardsPage() {
             The most popular products made by our community this year.
           </p>
         </div>
-        {Array.from({ length: 7 }).map((_, index) => (
+        {yearlyProducts.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            key={product.product_id}
+            id={`productId-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={'12'}
+            upvotesCount={'120'}
           />
         ))}
         <Button variant={'link'} asChild className='text-lg self-center'>

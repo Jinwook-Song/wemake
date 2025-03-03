@@ -25,6 +25,7 @@ export const products = pgTable('products', {
   stats: jsonb().notNull().default({
     views: 0,
     reviews: 0,
+    upvotes: 0,
   }),
   profile_id: uuid().references(() => profiles.profile_id, {
     onDelete: 'cascade',

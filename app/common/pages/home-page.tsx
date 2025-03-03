@@ -5,6 +5,9 @@ import { PostCard } from '~/features/community/components/post-card';
 import { IdeaCard } from '~/features/ideas/components/idea-card';
 import { JobCard } from '~/features/jobs/components/job-card';
 import { TeamCard } from '~/features/teams/components/team-card';
+import { getProductsByDateRnage } from '~/features/products/queries';
+import { DateTime } from 'luxon';
+import type { Route } from './+types/home-page';
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,7 +16,16 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function HomePage() {
+export const loader = async () => {
+  const products = await getProductsByDateRnage({
+    startDate: DateTime.now().startOf('day'),
+    endDate: DateTime.now().endOf('day'),
+    limit: 10,
+  });
+  return products;
+};
+
+export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
@@ -30,15 +42,15 @@ export default function HomePage() {
             </Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            commentsCount={12}
-            viewsCount={12}
-            upvotesCount={120}
+            key={product.product_id}
+            id={`productId-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
       </div>
@@ -57,7 +69,7 @@ export default function HomePage() {
         {Array.from({ length: 10 }).map((_, index) => (
           <PostCard
             key={index}
-            id='postId'
+            id={index}
             title='What is the best productivity tool?'
             author='Jinwook'
             authorAvatarUrl='https://github.com/google.png'

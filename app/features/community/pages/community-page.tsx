@@ -25,32 +25,13 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-type ServerData = {
-  secret: string;
-};
-
 export const loader = async () => {
-  const data: ServerData = { secret: 'key' };
-  return data;
-};
-
-export const clientLoader = async ({
-  serverLoader,
-}: Route.ClientLoaderArgs) => {
-  const serverData = await serverLoader();
-  console.log(serverData);
   const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
   return { topics, posts };
 };
 
-clientLoader.hydrate = true;
-
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
-  const { topics, posts } = loaderData as {
-    topics: Awaited<ReturnType<typeof getTopics>>;
-    posts: Awaited<ReturnType<typeof getPosts>>;
-  };
-  console.log(loaderData);
+  const { topics, posts } = loaderData;
 
   const [searchParams, setSearchParams] = useSearchParams();
   const sorting =
@@ -166,10 +147,10 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
   );
 }
 
-export function HydrateFallback() {
-  return (
-    <div>
-      <h1>Loading...</h1>
-    </div>
-  );
-}
+// export function HydrateFallback() {
+//   return (
+//     <div>
+//       <h1>Loading...</h1>
+//     </div>
+//   );
+// }
