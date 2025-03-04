@@ -6,6 +6,8 @@ import { Hero } from '~/common/components/hero';
 import { ProductCard } from '../components/product-card';
 import { Button } from '~/common/components/ui/button';
 import { ProductPagination } from '~/common/components/product-pagination';
+import { getProductsByDateRnage } from '../queries';
+import { PRODUCTS_PER_PAGE } from '../constants';
 
 const paramsSchema = z.object({
   year: z.coerce.number(),
@@ -30,7 +32,7 @@ export const meta: Route.MetaFunction = ({ params }) => {
   ];
 };
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
 
   if (!success) {
@@ -60,7 +62,15 @@ export function loader({ params }: Route.LoaderArgs) {
     );
   }
 
-  return { ...parsedData };
+  const url = new URL(request.url);
+  const products = await getProductsByDateRnage({
+    startDate: date.startOf('week'),
+    endDate: date.endOf('week'),
+    limit: PRODUCTS_PER_PAGE,
+    page: Number(url.searchParams.get('page')) || 1,
+  });
+
+  return { ...parsedData, products };
 }
 
 export default function WeeklyLeaderboardsPage({
@@ -77,6 +87,8 @@ export default function WeeklyLeaderboardsPage({
   const nextDate = urlDate.plus({ week: 1 });
 
   const isToday = urlDate.hasSame(DateTime.now().startOf('week'), 'week');
+
+  const products = loaderData.products;
 
   return (
     <div className='space-y-10'>
@@ -105,15 +117,15 @@ export default function WeeklyLeaderboardsPage({
         </Button>
       </div>
       <div className='flex flex-col gap-y-5 w-full max-w-screen-md mx-auto'>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {products.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            reviewsCount={'12'}
-            viewsCount={'12'}
-            upvotesCount={'120'}
+            key={product.product_id}
+            id={`product-${product.product_id}`}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
       </div>
