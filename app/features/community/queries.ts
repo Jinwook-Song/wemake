@@ -12,10 +12,14 @@ export const getPosts = async ({
   limit,
   sorting,
   period = 'all',
+  keyword,
+  topic,
 }: {
   limit: number;
   sorting: SortOption;
   period?: PeriodOption;
+  keyword?: string;
+  topic?: string;
 }) => {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const baseQuery = client
@@ -43,6 +47,9 @@ export const getPosts = async ({
       baseQuery.order('upvotes', { ascending: false });
     }
   }
+
+  if (keyword) baseQuery.ilike('title', `%${keyword}`);
+  if (topic) baseQuery.eq('slug', topic);
 
   const { data, error } = await baseQuery;
   if (error) throw new Error(error.message);

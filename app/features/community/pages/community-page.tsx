@@ -14,6 +14,7 @@ import { Input } from '~/common/components/ui/input';
 import { PostCard } from '../components/post-card';
 import { getPosts, getTopics } from '../queries';
 import { z } from 'zod';
+import { topics } from '../schema';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -29,6 +30,8 @@ export const meta: Route.MetaFunction = () => {
 const searchParamsSchema = z.object({
   sorting: z.enum(SORT_OPTIONS).optional().default('newest'),
   period: z.enum(PERIOD_OPTIONS).optional().default('all'),
+  keyword: z.string().optional(),
+  topic: z.string().optional(),
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -43,11 +46,11 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     );
   }
 
-  const { sorting, period } = parsedData;
+  const { sorting, period, keyword, topic } = parsedData;
 
   const [topics, posts] = await Promise.all([
     getTopics(),
-    getPosts({ limit: 7, sorting, period }),
+    getPosts({ limit: 7, sorting, period, keyword, topic }),
   ]);
   return { topics, posts };
 };
@@ -120,9 +123,11 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                 )}
               </div>
               <Form className='w-2/3'>
+                <Input type='hidden' name='sorting' value={sorting} />
+                <Input type='hidden' name='period' value={period} />
                 <Input
                   type='text'
-                  name='search'
+                  name='keyword'
                   placeholder='Search for discussions'
                 />
               </Form>
