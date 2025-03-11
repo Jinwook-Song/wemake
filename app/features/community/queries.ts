@@ -1,17 +1,32 @@
 import client from '~/supa-client';
+import type { SortOption } from './constants';
 
 export const getTopics = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 4000));
   const { data, error } = await client.from('topics').select('name, slug');
   if (error) throw new Error(error.message);
   return data;
 };
 
-export const getPosts = async () => {
+export const getPosts = async ({
+  limit,
+  sorting,
+}: {
+  limit: number;
+  sorting: SortOption;
+}) => {
   await new Promise((resolve) => setTimeout(resolve, 2000));
-  const { data, error } = await client
+  const baseQuery = client
     .from('community_post_list_view')
-    .select('*');
+    .select('*')
+    .limit(limit);
+
+  if (sorting === 'newest') {
+    baseQuery.order('created_at', { ascending: false });
+  } else {
+    baseQuery.order('upvotes', { ascending: false });
+  }
+
+  const { data, error } = await baseQuery;
   if (error) throw new Error(error.message);
   return data;
 };

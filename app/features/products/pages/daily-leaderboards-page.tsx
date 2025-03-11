@@ -110,7 +110,7 @@ export default function DailyLeaderboardsPage({
         {products.map((product) => (
           <ProductCard
             key={product.product_id}
-            id={`product-${product.product_id}`}
+            id={product.product_id}
             name={product.name}
             description={product.description}
             reviewsCount={product.reviews}

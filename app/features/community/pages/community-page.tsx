@@ -1,6 +1,6 @@
 import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/community-page';
-import { Form, Link, useSearchParams } from 'react-router';
+import { data, Form, Link, useSearchParams } from 'react-router';
 import { Button } from '~/common/components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import { PERIOD_OPTIONS, SORT_OPTIONS } from '../constants';
 import { Input } from '~/common/components/ui/input';
 import { PostCard } from '../components/post-card';
 import { getPosts, getTopics } from '../queries';
+import { z } from 'zod';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -25,8 +26,26 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
+const searchParamsSchema = z.object({
+  sorting: z.enum(SORT_OPTIONS).optional().default('newest'),
+});
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const url = new URL(request.url);
+  const { success, data: parsedData } = searchParamsSchema.safeParse(
+    Object.fromEntries(url.searchParams),
+  );
+  if (!success) {
+    throw data(
+      { message: 'Invalid params', error_code: 'INVALID_PARAMS' },
+      { status: 400 },
+    );
+  }
+
+  const [topics, posts] = await Promise.all([
+    getTopics(),
+    getPosts({ limit: 7, sorting: parsedData.sorting }),
+  ]);
   return { topics, posts };
 };
 

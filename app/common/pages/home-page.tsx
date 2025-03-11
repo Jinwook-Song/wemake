@@ -8,6 +8,7 @@ import { TeamCard } from '~/features/teams/components/team-card';
 import { getProductsByDateRnage } from '~/features/products/queries';
 import { DateTime } from 'luxon';
 import type { Route } from './+types/home-page';
+import { getPosts } from '~/features/community/queries';
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,10 +23,12 @@ export const loader = async () => {
     endDate: DateTime.now().endOf('day'),
     limit: 10,
   });
-  return products;
+  const posts = await getPosts({ limit: 7, sorting: 'newest' });
+  return { products, posts };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
+  const { products, posts } = loaderData;
   return (
     <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
@@ -42,10 +45,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             </Link>
           </Button>
         </div>
-        {loaderData.map((product) => (
+        {products.map((product) => (
           <ProductCard
             key={product.product_id}
-            id={`productId-${product.product_id}`}
+            id={product.product_id}
             name={product.name}
             description={product.description}
             reviewsCount={product.reviews}
@@ -66,15 +69,16 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <Link to={'/community'}>Explore all discussions &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {posts.map((post) => (
           <PostCard
-            key={index}
-            id={index}
-            title='What is the best productivity tool?'
-            author='Jinwook'
-            authorAvatarUrl='https://github.com/google.png'
-            category='Productivity'
-            createdAt='12 hours ago'
+            key={post.post_id}
+            id={post.post_id}
+            title={post.title}
+            author={post.author}
+            authorAvatarUrl={post.avatar}
+            category={post.topic}
+            createdAt={post.created_at}
+            votesCount={post.upvotes}
           />
         ))}
       </div>
