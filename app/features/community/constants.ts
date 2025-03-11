@@ -8,3 +8,4 @@ export const PERIOD_OPTIONS = [
   'month',
   'year',
 ] as const;
+export type PeriodOption = (typeof PERIOD_OPTIONS)[number];

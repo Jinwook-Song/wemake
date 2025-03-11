@@ -1,5 +1,6 @@
 import client from '~/supa-client';
-import type { SortOption } from './constants';
+import type { PeriodOption, SortOption } from './constants';
+import { DateTime } from 'luxon';
 
 export const getTopics = async () => {
   const { data, error } = await client.from('topics').select('name, slug');
@@ -10,9 +11,11 @@ export const getTopics = async () => {
 export const getPosts = async ({
   limit,
   sorting,
+  period = 'all',
 }: {
   limit: number;
   sorting: SortOption;
+  period?: PeriodOption;
 }) => {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const baseQuery = client
@@ -22,8 +25,23 @@ export const getPosts = async ({
 
   if (sorting === 'newest') {
     baseQuery.order('created_at', { ascending: false });
-  } else {
-    baseQuery.order('upvotes', { ascending: false });
+  } else if (sorting === 'popular') {
+    if (period === 'all') {
+      baseQuery.order('upvotes', { ascending: false });
+    } else {
+      const today = DateTime.now();
+      if (period === 'today') {
+        baseQuery.gte('created_at', today.startOf('day').toISO());
+      } else if (period === 'week') {
+        baseQuery.gte('created_at', today.startOf('week').toISO());
+      } else if (period === 'month') {
+        baseQuery.gte('created_at', today.startOf('month').toISO());
+      } else if (period === 'year') {
+        baseQuery.gte('created_at', today.startOf('year').toISO());
+      }
+
+      baseQuery.order('upvotes', { ascending: false });
+    }
   }
 
   const { data, error } = await baseQuery;

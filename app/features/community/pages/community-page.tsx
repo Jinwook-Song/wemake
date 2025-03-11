@@ -28,6 +28,7 @@ export const meta: Route.MetaFunction = () => {
 
 const searchParamsSchema = z.object({
   sorting: z.enum(SORT_OPTIONS).optional().default('newest'),
+  period: z.enum(PERIOD_OPTIONS).optional().default('all'),
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -42,9 +43,11 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     );
   }
 
+  const { sorting, period } = parsedData;
+
   const [topics, posts] = await Promise.all([
     getTopics(),
-    getPosts({ limit: 7, sorting: parsedData.sorting }),
+    getPosts({ limit: 7, sorting, period }),
   ]);
   return { topics, posts };
 };
