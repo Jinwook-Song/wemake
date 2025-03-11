@@ -2,8 +2,17 @@ import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/jobs-page';
 import { JobCard } from '../components/job-card';
 import { Button } from '~/common/components/ui/button';
-import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGES } from '../constants';
-import { Link, useSearchParams } from 'react-router';
+import {
+  JOB_TYPES,
+  LOCATION_TYPES,
+  SALARY_RANGES,
+  type JobType,
+  type LocationType,
+  type SalaryRange,
+} from '../constants';
+import { data, Link, useSearchParams } from 'react-router';
+import { getJobs } from '../queries';
+import { z } from 'zod';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -15,11 +24,39 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function JobsPage({}: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+const searchParamsSchema = z.object({
+  type: z.enum(JOB_TYPES.map((type) => type.value) as [JobType]).optional(),
+  location: z
+    .enum(LOCATION_TYPES.map((location) => location.value) as [LocationType])
+    .optional(),
+  salary: z
+    .enum(SALARY_RANGES.map((salary) => salary.value) as [SalaryRange])
+    .optional(),
+});
 
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const url = new URL(request.url);
+  const { success, data: parsedData } = searchParamsSchema.safeParse(
+    Object.fromEntries(url.searchParams),
+  );
+  if (!success) {
+    throw data(
+      { message: 'Invalid params', error_code: 'INVALID_PARAMS' },
+      { status: 400 },
+    );
+  }
+
+  const { type, location, salary } = parsedData;
+  const jobs = await getJobs({ limit: 10, type, location, salary });
+  return { jobs };
+};
+
+export default function JobsPage({ loaderData }: Route.ComponentProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { jobs } = loaderData;
   const onFilterChange = (key: string, value: string) => {
-    searchParams.set(key, value);
+    if (searchParams.get(key) === value) searchParams.delete(key);
+    else searchParams.set(key, value);
     setSearchParams(searchParams);
   };
 
@@ -31,18 +68,18 @@ export default function JobsPage({}: Route.ComponentProps) {
       />
       <div className='grid grid-cols-6 gap-20 items-start'>
         <div className='grid grid-cols-3 gap-5 col-span-4'>
-          {Array.from({ length: 10 }).map((_, index) => (
+          {jobs.map((job) => (
             <JobCard
-              key={index}
-              id='jobId'
-              company='Meta'
-              companyLogoUrl='https://github.com/facebook.png'
-              companyHeadquarters='San Francisco, CA'
-              title='Software Engineer'
-              salary='$100,000 - $120,000'
-              createdAt='12 hours ago'
-              type='Full-time'
-              positionLocation='Remote'
+              key={job.job_id}
+              id={job.job_id}
+              company={job.company_name}
+              companyLogoUrl={job.company_logo}
+              companyHeadquarters={job.company_location}
+              title={job.position}
+              salary={job.salary_range}
+              createdAt={job.created_at}
+              type={job.job_type}
+              positionLocation={job.location_type}
             />
           ))}
         </div>

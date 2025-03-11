@@ -10,6 +10,7 @@ import { DateTime } from 'luxon';
 import type { Route } from './+types/home-page';
 import { getPosts } from '~/features/community/queries';
 import { getGptIdeas } from '~/features/ideas/queries';
+import { getJobs } from '~/features/jobs/queries';
 
 export const meta: MetaFunction = () => {
   return [
@@ -26,11 +27,12 @@ export const loader = async () => {
   });
   const posts = await getPosts({ limit: 7, sorting: 'newest' });
   const ideas = await getGptIdeas({ limit: 10 });
-  return { products, posts, ideas };
+  const jobs = await getJobs({ limit: 10 });
+  return { products, posts, ideas, jobs };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
-  const { products, posts, ideas } = loaderData;
+  const { products, posts, ideas, jobs } = loaderData;
   return (
     <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
@@ -120,18 +122,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <Link to={'/jobs'}>Explore all jobs &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {jobs.map((job) => (
           <JobCard
-            key={index}
-            id='jobId'
-            company='Meta'
-            companyLogoUrl='https://github.com/facebook.png'
-            companyHeadquarters='San Francisco, CA'
-            title='Software Engineer'
-            salary='$100,000 - $120,000'
-            createdAt='12 hours ago'
-            type='Full-time'
-            positionLocation='Remote'
+            key={job.job_id}
+            id={job.job_id}
+            company={job.company_name}
+            companyLogoUrl={job.company_logo}
+            companyHeadquarters={job.company_location}
+            title={job.position}
+            salary={job.salary_range}
+            createdAt={job.created_at}
+            type={job.job_type}
+            positionLocation={job.location_type}
           />
         ))}
       </div>
