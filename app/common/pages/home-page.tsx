@@ -9,6 +9,7 @@ import { getProductsByDateRnage } from '~/features/products/queries';
 import { DateTime } from 'luxon';
 import type { Route } from './+types/home-page';
 import { getPosts } from '~/features/community/queries';
+import { getGptIdeas } from '~/features/ideas/queries';
 
 export const meta: MetaFunction = () => {
   return [
@@ -24,11 +25,12 @@ export const loader = async () => {
     limit: 10,
   });
   const posts = await getPosts({ limit: 7, sorting: 'newest' });
-  return { products, posts };
+  const ideas = await getGptIdeas({ limit: 10 });
+  return { products, posts, ideas };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
-  const { products, posts } = loaderData;
+  const { products, posts, ideas } = loaderData;
   return (
     <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
@@ -94,15 +96,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <Link to={'/community'}>Explore all discussions &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {ideas.map((idea) => (
           <IdeaCard
-            key={index}
-            id='ideaId'
-            title='A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a web dashboard to track progress and see insights.'
-            viewCount={123}
-            createdAt='12 hours ago'
-            likesCount={12}
-            claimed={index % 2 === 0}
+            key={idea.gpt_idea_id}
+            id={idea.gpt_idea_id}
+            title={idea.idea}
+            viewCount={idea.views}
+            createdAt={idea.created_at}
+            likesCount={idea.likes}
+            claimed={idea.claimed}
           />
         ))}
       </div>
