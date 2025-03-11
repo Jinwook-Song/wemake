@@ -11,6 +11,7 @@ import type { Route } from './+types/home-page';
 import { getPosts } from '~/features/community/queries';
 import { getGptIdeas } from '~/features/ideas/queries';
 import { getJobs } from '~/features/jobs/queries';
+import { getTeams } from '~/features/teams/queries';
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,11 +29,12 @@ export const loader = async () => {
   const posts = await getPosts({ limit: 7, sorting: 'newest' });
   const ideas = await getGptIdeas({ limit: 10 });
   const jobs = await getJobs({ limit: 10 });
-  return { products, posts, ideas, jobs };
+  const teams = await getTeams({ limit: 5 });
+  return { products, posts, ideas, jobs, teams };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
-  const { products, posts, ideas, jobs } = loaderData;
+  const { products, posts, ideas, jobs, teams } = loaderData;
   return (
     <div className='px-5 sm:px-20 space-y-40'>
       <div className='grid grid-cols-3 gap-4'>
@@ -149,18 +151,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <Link to={'/teams'}>Explore all teams &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 5 }).map((_, index) => (
+        {teams.map((team) => (
           <TeamCard
-            key={index}
-            id='teamId'
-            leaderUsername='jinwook'
-            leaderAvatarUrl='https://github.com/jinwook-song.png'
-            positions={[
-              'React Developer',
-              'Backend Developer',
-              'Product Manager',
-            ]}
-            projectDescription='a new social media platform'
+            key={team.team_id}
+            id={team.team_id}
+            leaderUsername={team.team_leader.username}
+            leaderAvatarUrl={team.team_leader.avatar}
+            positions={team.roles.split(',')}
+            projectDescription={team.product_description}
           />
         ))}
       </div>
