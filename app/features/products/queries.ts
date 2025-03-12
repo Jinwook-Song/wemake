@@ -1,5 +1,15 @@
 import type { DateTime } from 'luxon';
 import client from '~/supa-client';
+import { PRODUCTS_PER_PAGE } from './constants';
+
+const productListSelect = `
+  product_id,
+  name,
+  description,
+  upvotes:stats->>upvotes,
+  views:stats->>views,
+  reviews:stats->>reviews
+`;
 
 export const getProductsByDateRnage = async ({
   startDate,
@@ -14,16 +24,7 @@ export const getProductsByDateRnage = async ({
 }) => {
   const { data, error } = await client
     .from('products')
-    .select(
-      `
-        product_id,
-        name,
-        description,
-        upvotes:stats->>upvotes,
-        views:stats->>views,
-        reviews:stats->>reviews
-        `,
-    )
+    .select(productListSelect)
     .order('stats->>upvotes', { ascending: false })
     .gte('created_at', startDate.toISO())
     .lte('created_at', endDate.toISO())
@@ -32,4 +33,66 @@ export const getProductsByDateRnage = async ({
   if (error) throw error;
 
   return data;
+};
+
+export const getCategories = async () => {
+  const { data, error } = await client.from('categories').select(`
+    category_id,
+    name,
+    description
+    `);
+
+  if (error) throw error;
+
+  return data;
+};
+
+export const getCategoryById = async (categoryId: number) => {
+  const { data, error } = await client
+    .from('categories')
+    .select(
+      `
+    category_id,
+    name,
+    description
+    `,
+    )
+    .eq('category_id', categoryId)
+    .single();
+
+  if (error) throw error;
+
+  return data;
+};
+
+export const getProductsByCategoryId = async ({
+  categoryId,
+  page,
+  limit,
+}: {
+  categoryId: number;
+  page: number;
+  limit: number;
+}) => {
+  const { data, error } = await client
+    .from('products')
+    .select(productListSelect)
+    .eq('category_id', categoryId)
+    .range((page - 1) * limit, page * limit - 1);
+
+  if (error) throw error;
+
+  return data;
+};
+
+export const getCategoryPageCount = async (categoryId: number) => {
+  const { count, error } = await client
+    .from('products')
+    .select('product_id', { count: 'exact', head: true })
+    .eq('category_id', categoryId);
+
+  if (error) throw error;
+  if (!count) return 1;
+
+  return Math.ceil(count / PRODUCTS_PER_PAGE);
 };

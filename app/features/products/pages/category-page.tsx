@@ -2,6 +2,14 @@ import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/category-page';
 import { ProductPagination } from '~/common/components/product-pagination';
 import { ProductCard } from '../components/product-card';
+import {
+  getCategoryById,
+  getCategoryPageCount,
+  getProductsByCategoryId,
+} from '../queries';
+import { z } from 'zod';
+import { data } from 'react-router';
+import { PRODUCTS_PER_PAGE } from '../constants';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -13,28 +21,63 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function CategoryPage() {
+const searchParamsSchema = z.object({
+  page: z.coerce.number().min(1).optional().default(1),
+});
+
+const paramsSchema = z.object({
+  category: z.coerce.number(),
+});
+
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const { success: successSearchParams, data: parsedDataSearchParams } =
+    searchParamsSchema.safeParse(Object.fromEntries(url.searchParams));
+
+  const { success: successParams, data: parsedDataParams } =
+    paramsSchema.safeParse(params);
+
+  if (!successSearchParams || !successParams) {
+    throw data(
+      { message: 'Invalid params', error_code: 'INVALID_PARAMS' },
+      { status: 400 },
+    );
+  }
+
+  const [category, products, pageCount] = await Promise.all([
+    getCategoryById(parsedDataParams.category),
+    getProductsByCategoryId({
+      categoryId: parsedDataParams.category,
+      page: parsedDataSearchParams.page,
+      limit: PRODUCTS_PER_PAGE,
+    }),
+    getCategoryPageCount(parsedDataParams.category),
+  ]);
+
+  return { category, products, pageCount };
+}
+
+export default function CategoryPage({ loaderData }: Route.ComponentProps) {
+  const { category, products, pageCount } = loaderData;
+
   return (
     <div className='space-y-10'>
-      <Hero
-        title='Developer Tools'
-        description='Tools for developers to build products faster'
-      />
+      <Hero title={category.name} description={category.description} />
 
       <div className='flex flex-col gap-y-5 w-full max-w-screen-md mx-auto'>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {products.map((product) => (
           <ProductCard
-            key={index}
-            id='productId'
-            name='Product Name'
-            description='Product Description'
-            reviewsCount={'12'}
-            viewsCount={'12'}
-            upvotesCount={'120'}
+            key={product.product_id}
+            id={product.product_id}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            upvotesCount={product.upvotes}
           />
         ))}
       </div>
-      <ProductPagination totalPages={10} />
+      <ProductPagination totalPages={pageCount} />
     </div>
   );
 }

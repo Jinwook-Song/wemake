@@ -26,10 +26,12 @@ export const loader = async () => {
     endDate: DateTime.now().endOf('day'),
     limit: 10,
   });
-  const posts = await getPosts({ limit: 7, sorting: 'newest' });
-  const ideas = await getGptIdeas({ limit: 10 });
-  const jobs = await getJobs({ limit: 10 });
-  const teams = await getTeams({ limit: 5 });
+  const [posts, ideas, jobs, teams] = await Promise.all([
+    getPosts({ limit: 7, sorting: 'newest' }),
+    getGptIdeas({ limit: 10 }),
+    getJobs({ limit: 10 }),
+    getTeams({ limit: 5 }),
+  ]);
   return { products, posts, ideas, jobs, teams };
 };
 

@@ -8,7 +8,7 @@ import { Link } from 'react-router';
 import { ChevronRightIcon } from 'lucide-react';
 
 interface CategoryCardProps {
-  id: string;
+  id: number;
   name: string;
   description: string;
 }
