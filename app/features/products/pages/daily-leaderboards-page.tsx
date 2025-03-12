@@ -112,7 +112,7 @@ export default function DailyLeaderboardsPage({
             key={product.product_id}
             id={product.product_id}
             name={product.name}
-            description={product.description}
+            description={product.tagline}
             reviewsCount={product.reviews}
             viewsCount={product.views}
             upvotesCount={product.upvotes}
