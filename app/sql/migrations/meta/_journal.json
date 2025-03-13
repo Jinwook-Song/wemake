@@ -85,6 +85,13 @@
       "when": 1741700127682,
       "tag": "0011_rapid_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1741864478176,
+      "tag": "0012_broken_moira_mactaggert",
+      "breakpoints": true
     }
   ]
 }

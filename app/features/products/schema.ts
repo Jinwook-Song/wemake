@@ -19,7 +19,7 @@ export const products = pgTable('products', {
   name: text().notNull(),
   tagline: text().notNull(),
   description: text().notNull(),
-  hot_it_works: text().notNull(),
+  how_it_works: text().notNull(),
   icon: text().notNull(),
   url: text().notNull(),
   stats: jsonb().notNull().default({

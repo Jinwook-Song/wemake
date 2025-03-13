@@ -2,6 +2,15 @@ import { ChevronUpIcon, StarIcon } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 import { Button, buttonVariants } from '~/common/components/ui/button';
 import { cn } from '~/lib/utils';
+import type { Route } from './+types/product-overview-layout';
+import { getProductById } from '../queries';
+
+export const loader = async ({
+  params,
+}: Route.LoaderArgs & { params: { productId: string } }) => {
+  const product = await getProductById(params.productId);
+  return { product };
+};
 
 export default function ProductOverviewLayout() {
   return (

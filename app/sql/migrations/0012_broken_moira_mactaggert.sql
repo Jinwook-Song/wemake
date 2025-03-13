@@ -1,0 +1,1 @@
+ALTER TABLE "products" RENAME COLUMN "hot_it_works" TO "how_it_works";

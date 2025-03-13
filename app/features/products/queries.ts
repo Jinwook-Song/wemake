@@ -128,3 +128,15 @@ export const getSearchPageCount = async (query: string) => {
 
   return Math.ceil(count / PRODUCTS_PER_PAGE);
 };
+
+export const getProductById = async (productId: string) => {
+  const { data, error } = await client
+    .from('product_overview_view')
+    .select('*')
+    .eq('product_id', productId)
+    .single();
+
+  if (error) throw error;
+
+  return data;
+};
