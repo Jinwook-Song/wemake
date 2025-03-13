@@ -5,6 +5,13 @@ import { cn } from '~/lib/utils';
 import type { Route } from './+types/product-overview-layout';
 import { getProductById } from '../queries';
 
+export function meta({ data: { product } }: Route.MetaArgs) {
+  return [
+    { title: `${product.name} Overview | wemake` },
+    { name: 'description', content: product.description },
+  ];
+}
+
 export const loader = async ({
   params,
 }: Route.LoaderArgs & { params: { productId: string } }) => {
@@ -12,22 +19,35 @@ export const loader = async ({
   return { product };
 };
 
-export default function ProductOverviewLayout() {
+export default function ProductOverviewLayout({
+  loaderData,
+}: Route.ComponentProps) {
+  const { product } = loaderData;
+
   return (
     <div className='space-y-10'>
       <div className='flex justify-between'>
         <div className='flex gap-8'>
           <div className='size-40 rounded-xl shadow-xl bg-primary/50 shrink-0'></div>
           <div>
-            <h1 className='text-5xl font-semibold'>Product Name</h1>
-            <p className='text-2xl font-light'>Product Description</p>
+            <h1 className='text-5xl font-semibold'>{product.name}</h1>
+            <p className='text-2xl font-light'>{product.tagline}</p>
             <div className='flex items-center gap-2 mt-5'>
               <div className='flex text-yellow-400'>
                 {Array.from({ length: 5 }).map((_, index) => (
-                  <StarIcon className='size-4' fill='currentColor' />
+                  <StarIcon
+                    className='size-4'
+                    fill={
+                      index < Math.floor(product.average_rating)
+                        ? 'currentColor'
+                        : 'none'
+                    }
+                  />
                 ))}
               </div>
-              <span className='text-muted-foreground'>100 Reviews</span>
+              <span className='text-muted-foreground'>
+                {product.reviews} Reviews
+              </span>
             </div>
           </div>
         </div>
@@ -40,7 +60,7 @@ export default function ProductOverviewLayout() {
             Visit Website
           </Button>
           <Button size={'lg'} className='text-lg h-14 px-10'>
-            <ChevronUpIcon className='size-4' /> Upvote (100)
+            <ChevronUpIcon className='size-4' /> Upvote ({product.upvotes})
           </Button>
         </div>
       </div>
@@ -53,7 +73,7 @@ export default function ProductOverviewLayout() {
               'h-9',
             )
           }
-          to={`/products/productId/overview`}
+          to={`/products/${product.product_id}/overview`}
         >
           Overview
         </NavLink>
@@ -64,13 +84,19 @@ export default function ProductOverviewLayout() {
               'h-9',
             )
           }
-          to={`/products/productId/reviews`}
+          to={`/products/${product.product_id}/reviews`}
         >
           Reviews
         </NavLink>
       </div>
       <div>
-        <Outlet />
+        <Outlet
+          context={{
+            productId: product.product_id,
+            description: product.description,
+            howItWorks: product.how_it_works,
+          }}
+        />
       </div>
     </div>
   );
