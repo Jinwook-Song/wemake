@@ -95,6 +95,7 @@ export default function ProductOverviewLayout({
             productId: product.product_id,
             description: product.description,
             howItWorks: product.how_it_works,
+            reviewCount: product.reviews,
           }}
         />
       </div>
