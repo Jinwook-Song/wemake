@@ -7,7 +7,7 @@ import {
 } from '~/common/components/ui/breadcrumb';
 import type { Route } from './+types/post-page';
 import { Form, Link } from 'react-router';
-import { ChevronUpIcon, DotIcon, MessageCircleIcon } from 'lucide-react';
+import { ChevronUpIcon, DotIcon } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import {
   Avatar,

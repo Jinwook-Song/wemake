@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
+import { getTeamById } from '../queries';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -23,28 +24,35 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function TeamPage({}: Route.ComponentProps) {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  const { teamId } = params;
+  const team = await getTeamById(teamId);
+  return { team };
+};
+
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
+  const { team } = loaderData;
   return (
     <div className='space-y-20'>
-      <Hero title="Join Jinwook's Team" />
+      <Hero title={`Join ${team.team_leader.name}'s Team`} />
       <div className='grid grid-cols-6 gap-40 items-start'>
         <div className='col-span-4 grid grid-cols-4 gap-5'>
           {[
             {
               title: 'Product Name',
-              value: 'Doggie Social',
+              value: team.product_description,
             },
             {
               title: 'Stage',
-              value: 'MVP',
+              value: team.product_stage,
             },
             {
               title: 'Team Size',
-              value: 10,
+              value: team.team_size,
             },
             {
               title: 'Available Equity',
-              value: 50,
+              value: team.equity_split,
             },
           ].map((item) => (
             <Card>
@@ -52,7 +60,7 @@ export default function TeamPage({}: Route.ComponentProps) {
                 <CardTitle className='text-sm font-medium text-muted-foreground'>
                   {item.title}
                 </CardTitle>
-                <CardContent className='text-2xl font-bold p-0'>
+                <CardContent className='text-2xl font-bold p-0 capitalize'>
                   <p>{item.value}</p>
                 </CardContent>
               </CardHeader>
@@ -65,12 +73,7 @@ export default function TeamPage({}: Route.ComponentProps) {
               </CardTitle>
               <CardContent className='text-2xl font-bold p-0'>
                 <ul className='text-lg list-disc list-inside'>
-                  {[
-                    'React Developer',
-                    'Product Manager',
-                    'UI/UX Designer',
-                    'Full Stack Developer',
-                  ].map((item) => (
+                  {team.roles.split(',').map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -83,10 +86,7 @@ export default function TeamPage({}: Route.ComponentProps) {
                 Idea Description
               </CardTitle>
               <CardContent className='text-xl font-medium p-0'>
-                <p>
-                  Doggie Social is a social media platform for dogs. It allows
-                  dogs to connect with each other and share their experiences.
-                </p>
+                <p>{team.product_description}</p>
               </CardContent>
             </CardHeader>
           </Card>
@@ -94,12 +94,14 @@ export default function TeamPage({}: Route.ComponentProps) {
         <aside className='col-span-2 border rounded-lg shadow-md p-6 space-y-4'>
           <div className='flex gap-5'>
             <Avatar className='size-14'>
-              <AvatarFallback>J</AvatarFallback>
-              <AvatarImage src='https://github.com/jinwook-song.png' />
+              <AvatarFallback>{team.team_leader.name[0]}</AvatarFallback>
+              {team.team_leader.avatar && (
+                <AvatarImage src={team.team_leader.avatar} />
+              )}
             </Avatar>
             <div className='flex flex-col'>
-              <h4 className='text-lg font-medium'>Jinwook</h4>
-              <Badge variant={'secondary'}>Entrepreneur</Badge>
+              <h4 className='text-lg font-medium'>{team.team_leader.name}</h4>
+              <Badge variant={'secondary'}>{team.team_leader.role}</Badge>
             </div>
           </div>
           <Form className='space-y-5'>
