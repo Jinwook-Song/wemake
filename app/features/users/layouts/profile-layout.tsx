@@ -19,7 +19,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { PencilIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { getUserByUsername } from '../queries';
-import client from '~/supa-client';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
   const { user } = data;
@@ -34,7 +34,8 @@ export const loader = async ({
   request,
 }: Route.LoaderArgs & { params: { username: string } }) => {
   const { username } = params;
-  const user = await getUserByUsername(username);
+  const { client, headers } = makeSSRClient(request);
+  const user = await getUserByUsername(client, { username });
   if (request.url.endsWith(`/users/${username}`)) {
     await client.rpc('track_event', {
       event_type: 'profile_view',

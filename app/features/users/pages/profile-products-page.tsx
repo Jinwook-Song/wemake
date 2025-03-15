@@ -1,10 +1,13 @@
 import { ProductCard } from '~/features/products/components/product-card';
 import type { Route } from './+types/profile-products-page';
 import { getUserProducts } from '../queries';
-
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const { username } = params;
-  const products = await getUserProducts(username);
+import { makeSSRClient } from '~/supa-client';
+export const loader = async ({
+  params: { username },
+  request,
+}: Route.LoaderArgs & { params: { username: string } }) => {
+  const { client, headers } = makeSSRClient(request);
+  const products = await getUserProducts(client, { username });
   return { products };
 };
 

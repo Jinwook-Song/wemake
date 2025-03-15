@@ -1,6 +1,9 @@
-import client from '~/supa-client';
+import type { SupaClient } from '~/supa-client';
 
-export const getTeams = async ({ limit }: { limit: number }) => {
+export const getTeams = async (
+  client: SupaClient,
+  { limit }: { limit: number },
+) => {
   const { data, error } = await client
     .from('teams')
     .select(
@@ -19,7 +22,10 @@ export const getTeams = async ({ limit }: { limit: number }) => {
   return data;
 };
 
-export const getTeamById = async (teamId: string) => {
+export const getTeamById = async (
+  client: SupaClient,
+  { teamId }: { teamId: string },
+) => {
   const { data, error } = await client
     .from('teams')
     .select(

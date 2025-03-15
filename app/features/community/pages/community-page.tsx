@@ -15,6 +15,7 @@ import { PostCard } from '../components/post-card';
 import { getPosts, getTopics } from '../queries';
 import { z } from 'zod';
 import { topics } from '../schema';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -35,6 +36,7 @@ const searchParamsSchema = z.object({
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
   const url = new URL(request.url);
   const { success, data: parsedData } = searchParamsSchema.safeParse(
     Object.fromEntries(url.searchParams),
@@ -49,8 +51,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const { sorting, period, keyword, topic } = parsedData;
 
   const [topics, posts] = await Promise.all([
-    getTopics(),
-    getPosts({ limit: 7, sorting, period, keyword, topic }),
+    getTopics(client),
+    getPosts(client, { limit: 7, sorting, period, keyword, topic }),
   ]);
   return { topics, posts };
 };

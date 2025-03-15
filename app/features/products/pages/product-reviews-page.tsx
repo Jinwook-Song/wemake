@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useOutletContext } from 'react-router';
 import type { Route } from './+types/product-reviews-page';
 import { getProductReviews } from '../queries';
+import { makeSSRClient } from '~/supa-client';
 
 export function meta() {
   return [
@@ -14,9 +15,12 @@ export function meta() {
   ];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const { productId } = params;
-  const reviews = await getProductReviews(productId);
+export const loader = async ({
+  params: { productId },
+  request,
+}: Route.LoaderArgs & { params: { productId: string } }) => {
+  const { client, headers } = makeSSRClient(request);
+  const reviews = await getProductReviews(client, { productId });
   return { reviews };
 };
 

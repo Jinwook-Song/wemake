@@ -8,7 +8,7 @@ import { Button } from '~/common/components/ui/button';
 import { ProductPagination } from '~/common/components/product-pagination';
 import { getProductsByDateRnage } from '../queries';
 import { PRODUCTS_PER_PAGE } from '../constants';
-
+import { makeSSRClient } from '~/supa-client';
 const paramsSchema = z.object({
   year: z.coerce.number(),
   week: z.coerce.number(),
@@ -33,6 +33,7 @@ export const meta: Route.MetaFunction = ({ params }) => {
 };
 
 export async function loader({ params, request }: Route.LoaderArgs) {
+  const { client, headers } = makeSSRClient(request);
   const { success, data: parsedData } = paramsSchema.safeParse(params);
 
   if (!success) {
@@ -63,7 +64,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 
   const url = new URL(request.url);
-  const products = await getProductsByDateRnage({
+  const products = await getProductsByDateRnage(client, {
     startDate: date.startOf('week'),
     endDate: date.endOf('week'),
     limit: PRODUCTS_PER_PAGE,

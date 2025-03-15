@@ -19,6 +19,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { Reply } from '~/features/community/components/reply';
 import { getPostById, getPostReplies } from '../queries';
 import { DateTime } from 'luxon';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -27,9 +28,10 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export async function loader({ params }: Route.LoaderArgs) {
-  const post = await getPostById(params.postId);
-  const replies = await getPostReplies(params.postId);
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const { client, headers } = makeSSRClient(request);
+  const post = await getPostById(client, { postId: params.postId });
+  const replies = await getPostReplies(client, { postId: params.postId });
   return { post, replies };
 }
 

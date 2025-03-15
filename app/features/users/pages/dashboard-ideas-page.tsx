@@ -16,7 +16,7 @@ export default function DashboardIdeasPage({}: Route.ComponentProps) {
         {Array.from({ length: 10 }).map((_, index) => (
           <IdeaCard
             key={index}
-            id='ideaId'
+            id={index}
             title='A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a web dashboard to track progress and see insights.'
             viewCount={123}
             createdAt='12 hours ago'

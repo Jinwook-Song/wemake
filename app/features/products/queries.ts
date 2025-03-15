@@ -1,6 +1,6 @@
 import type { DateTime } from 'luxon';
-import client from '~/supa-client';
 import { PRODUCTS_PER_PAGE } from './constants';
+import type { SupaClient } from '~/supa-client';
 
 export const productListSelect = `
   product_id,
@@ -11,17 +11,20 @@ export const productListSelect = `
   reviews:stats->>reviews
 `;
 
-export const getProductsByDateRnage = async ({
-  startDate,
-  endDate,
-  limit,
-  page = 1,
-}: {
-  startDate: DateTime;
-  endDate: DateTime;
-  limit: number;
-  page?: number;
-}) => {
+export const getProductsByDateRnage = async (
+  client: SupaClient,
+  {
+    startDate,
+    endDate,
+    limit,
+    page = 1,
+  }: {
+    startDate: DateTime;
+    endDate: DateTime;
+    limit: number;
+    page?: number;
+  },
+) => {
   const { data, error } = await client
     .from('products')
     .select(productListSelect)
@@ -35,7 +38,7 @@ export const getProductsByDateRnage = async ({
   return data;
 };
 
-export const getCategories = async () => {
+export const getCategories = async (client: SupaClient) => {
   const { data, error } = await client.from('categories').select(`
     category_id,
     name,
@@ -47,7 +50,10 @@ export const getCategories = async () => {
   return data;
 };
 
-export const getCategoryById = async (categoryId: number) => {
+export const getCategoryById = async (
+  client: SupaClient,
+  { categoryId }: { categoryId: number },
+) => {
   const { data, error } = await client
     .from('categories')
     .select(
@@ -65,15 +71,18 @@ export const getCategoryById = async (categoryId: number) => {
   return data;
 };
 
-export const getProductsByCategoryId = async ({
-  categoryId,
-  page,
-  limit,
-}: {
-  categoryId: number;
-  page: number;
-  limit: number;
-}) => {
+export const getProductsByCategoryId = async (
+  client: SupaClient,
+  {
+    categoryId,
+    page,
+    limit,
+  }: {
+    categoryId: number;
+    page: number;
+    limit: number;
+  },
+) => {
   const { data, error } = await client
     .from('products')
     .select(productListSelect)
@@ -85,7 +94,10 @@ export const getProductsByCategoryId = async ({
   return data;
 };
 
-export const getCategoryPageCount = async (categoryId: number) => {
+export const getCategoryPageCount = async (
+  client: SupaClient,
+  { categoryId }: { categoryId: number },
+) => {
   const { count, error } = await client
     .from('products')
     .select('product_id', { count: 'exact', head: true })
@@ -97,15 +109,18 @@ export const getCategoryPageCount = async (categoryId: number) => {
   return Math.ceil(count / PRODUCTS_PER_PAGE);
 };
 
-export const getProductsBySearch = async ({
-  query,
-  page,
-  limit,
-}: {
-  query: string;
-  page: number;
-  limit: number;
-}) => {
+export const getProductsBySearch = async (
+  client: SupaClient,
+  {
+    query,
+    page,
+    limit,
+  }: {
+    query: string;
+    page: number;
+    limit: number;
+  },
+) => {
   const { data, error } = await client
     .from('products')
     .select(productListSelect)
@@ -117,7 +132,10 @@ export const getProductsBySearch = async ({
   return data;
 };
 
-export const getSearchPageCount = async (query: string) => {
+export const getSearchPageCount = async (
+  client: SupaClient,
+  { query }: { query: string },
+) => {
   const { count, error } = await client
     .from('products')
     .select('product_id', { count: 'exact', head: true })
@@ -129,7 +147,10 @@ export const getSearchPageCount = async (query: string) => {
   return Math.ceil(count / PRODUCTS_PER_PAGE);
 };
 
-export const getProductById = async (productId: string) => {
+export const getProductById = async (
+  client: SupaClient,
+  { productId }: { productId: string },
+) => {
   const { data, error } = await client
     .from('product_overview_view')
     .select('*')
@@ -141,7 +162,10 @@ export const getProductById = async (productId: string) => {
   return data;
 };
 
-export const getProductReviews = async (productId: string) => {
+export const getProductReviews = async (
+  client: SupaClient,
+  { productId }: { productId: string },
+) => {
   const { data, error } = await client
     .from('reviews')
     .select(

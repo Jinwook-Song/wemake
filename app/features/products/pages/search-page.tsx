@@ -8,6 +8,7 @@ import { Input } from '~/common/components/ui/input';
 import { Button } from '~/common/components/ui/button';
 import { getProductsBySearch, getSearchPageCount } from '../queries';
 import { PRODUCTS_PER_PAGE } from '../constants';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -22,6 +23,7 @@ const paramsSchema = z.object({
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
+  const { client, headers } = makeSSRClient(request);
   const url = new URL(request.url);
   const { success, data: parsedData } = paramsSchema.safeParse(
     Object.fromEntries(url.searchParams),
@@ -34,12 +36,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   const [products, pageCount] = await Promise.all([
-    getProductsBySearch({
+    getProductsBySearch(client, {
       query: parsedData.query,
       page: parsedData.page,
       limit: PRODUCTS_PER_PAGE,
     }),
-    getSearchPageCount(parsedData.query),
+    getSearchPageCount(client, { query: parsedData.query }),
   ]);
 
   return { products, pageCount };

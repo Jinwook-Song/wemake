@@ -4,6 +4,7 @@ import { DotIcon, EyeIcon, HeartIcon } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { getGptIdea } from '../queries';
 import { DateTime } from 'luxon';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = ({ data: { idea } }) => {
   return [
@@ -12,8 +13,12 @@ export const meta: Route.MetaFunction = ({ data: { idea } }) => {
   ];
 };
 
-export const loader = async ({ params: { ideaId } }: Route.LoaderArgs) => {
-  const idea = await getGptIdea({ ideaId });
+export const loader = async ({
+  params: { ideaId },
+  request,
+}: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const idea = await getGptIdea(client, { ideaId });
   return { idea };
 };
 

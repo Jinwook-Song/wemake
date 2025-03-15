@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { getTeamById } from '../queries';
-
+import { makeSSRClient } from '~/supa-client';
 export const meta: Route.MetaFunction = () => {
   return [
     { title: 'Team Details | wemake' },
@@ -24,9 +24,12 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const { teamId } = params;
-  const team = await getTeamById(teamId);
+export const loader = async ({
+  params: { teamId },
+  request,
+}: Route.LoaderArgs & { params: { teamId: string } }) => {
+  const { client, headers } = makeSSRClient(request);
+  const team = await getTeamById(client, { teamId });
   return { team };
 };
 

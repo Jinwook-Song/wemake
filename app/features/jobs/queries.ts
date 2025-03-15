@@ -1,17 +1,20 @@
-import client from '~/supa-client';
+import type { SupaClient } from '~/supa-client';
 import type { JobType, LocationType, SalaryRange } from './constants';
 
-export const getJobs = async ({
-  limit,
-  type,
-  location,
-  salary,
-}: {
-  limit: number;
-  type?: JobType;
-  location?: LocationType;
-  salary?: SalaryRange;
-}) => {
+export const getJobs = async (
+  client: SupaClient,
+  {
+    limit,
+    type,
+    location,
+    salary,
+  }: {
+    limit: number;
+    type?: JobType;
+    location?: LocationType;
+    salary?: SalaryRange;
+  },
+) => {
   const baseQuery = client
     .from('jobs')
     .select(
@@ -49,7 +52,10 @@ export const getJobs = async ({
   return data;
 };
 
-export const getJobById = async (jobId: string) => {
+export const getJobById = async (
+  client: SupaClient,
+  { jobId }: { jobId: string },
+) => {
   const { data, error } = await client
     .from('jobs')
     .select('*')

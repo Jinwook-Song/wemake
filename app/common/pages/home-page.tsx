@@ -12,6 +12,7 @@ import { getPosts } from '~/features/community/queries';
 import { getGptIdeas } from '~/features/ideas/queries';
 import { getJobs } from '~/features/jobs/queries';
 import { getTeams } from '~/features/teams/queries';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,17 +21,19 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  const products = await getProductsByDateRnage({
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+
+  const products = await getProductsByDateRnage(client, {
     startDate: DateTime.now().startOf('day'),
     endDate: DateTime.now().endOf('day'),
     limit: 10,
   });
   const [posts, ideas, jobs, teams] = await Promise.all([
-    getPosts({ limit: 7, sorting: 'newest' }),
-    getGptIdeas({ limit: 10 }),
-    getJobs({ limit: 10 }),
-    getTeams({ limit: 5 }),
+    getPosts(client, { limit: 7, sorting: 'newest' }),
+    getGptIdeas(client, { limit: 10 }),
+    getJobs(client, { limit: 10 }),
+    getTeams(client, { limit: 5 }),
   ]);
   return { products, posts, ideas, jobs, teams };
 };

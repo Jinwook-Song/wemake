@@ -1,26 +1,29 @@
-import client from '~/supa-client';
+import type { SupaClient } from '~/supa-client';
 import type { PeriodOption, SortOption } from './constants';
 import { DateTime } from 'luxon';
 
-export const getTopics = async () => {
+export const getTopics = async (client: SupaClient) => {
   const { data, error } = await client.from('topics').select('name, slug');
   if (error) throw new Error(error.message);
   return data;
 };
 
-export const getPosts = async ({
-  limit,
-  sorting,
-  period = 'all',
-  keyword,
-  topic,
-}: {
-  limit: number;
-  sorting: SortOption;
-  period?: PeriodOption;
-  keyword?: string;
-  topic?: string;
-}) => {
+export const getPosts = async (
+  client: SupaClient,
+  {
+    limit,
+    sorting,
+    period = 'all',
+    keyword,
+    topic,
+  }: {
+    limit: number;
+    sorting: SortOption;
+    period?: PeriodOption;
+    keyword?: string;
+    topic?: string;
+  },
+) => {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const baseQuery = client
     .from('community_post_list_view')
@@ -56,11 +59,14 @@ export const getPosts = async ({
   return data;
 };
 
-export const getPostById = async (id: string) => {
+export const getPostById = async (
+  client: SupaClient,
+  { postId }: { postId: string },
+) => {
   const { data, error } = await client
     .from('community_post_detail_view')
     .select('*')
-    .eq('post_id', id)
+    .eq('post_id', postId)
     .single();
   if (error) throw new Error(error.message);
   return data;
@@ -69,7 +75,10 @@ export const getPostById = async (id: string) => {
 /**
  * 재귀적으로 댓글을 가져오는 쿼리
  */
-export const getPostReplies = async (postId: string) => {
+export const getPostReplies = async (
+  client: SupaClient,
+  { postId }: { postId: string },
+) => {
   const replyQuery = `
     post_reply_id,
     reply,

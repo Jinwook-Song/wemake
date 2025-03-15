@@ -1,10 +1,13 @@
 import { getUserPosts } from '../queries';
 import type { Route } from './+types/profile-posts-page';
 import { PostCard } from '~/features/community/components/post-card';
-
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const { username } = params;
-  const posts = await getUserPosts(username);
+import { makeSSRClient } from '~/supa-client';
+export const loader = async ({
+  params: { username },
+  request,
+}: Route.LoaderArgs & { params: { username: string } }) => {
+  const { client, headers } = makeSSRClient(request);
+  const posts = await getUserPosts(client, { username });
   return { posts };
 };
 
