@@ -18,25 +18,36 @@ import { Textarea } from '~/common/components/ui/textarea';
 import { Badge } from '~/common/components/ui/badge';
 import { PencilIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { getUserByUsername } from '../queries';
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
+  const { user } = data;
   return [
-    { title: 'Profile | wemake' },
+    { title: `${user.name} | wemake` },
     { name: 'description', content: 'View user profile' },
   ];
 };
 
-export default function ProfileLayout({}: Route.ComponentProps) {
+export const loader = async ({
+  params,
+}: Route.LoaderArgs & { params: { username: string } }) => {
+  const { username } = params;
+  const user = await getUserByUsername(username);
+  return { user };
+};
+
+export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
+  const { user } = loaderData;
   return (
     <div className='space-y-10'>
       <div className='flex items-center gap-5'>
         <Avatar className='size-40'>
-          <AvatarFallback>J</AvatarFallback>
-          <AvatarImage src='https://github.com/jinwook-song.png' />
+          <AvatarFallback className='text-3xl'>{user.name[0]}</AvatarFallback>
+          {user.avatar && <AvatarImage src={user.avatar} />}
         </Avatar>
         <div className='flex flex-col gap-4'>
           <div className='flex gap-2 items-center'>
-            <h1 className='text-4xl font-bold'>Jinwook</h1>
+            <h1 className='text-4xl font-bold'>{user.name}</h1>
             <Button size={'lg'} variant={'outline'} asChild>
               <Link to='/my/settings'>
                 <PencilIcon className='size-4' />
@@ -76,8 +87,10 @@ export default function ProfileLayout({}: Route.ComponentProps) {
             </Dialog>
           </div>
           <div className='flex gap-2 items-center'>
-            <span className='text-sm text-muted-foreground'>@jinwook</span>
-            <Badge variant={'secondary'}>Product Designer</Badge>
+            <span className='text-sm text-muted-foreground'>
+              @{user.username}
+            </span>
+            <Badge variant={'secondary'}>{user.role}</Badge>
             <Badge variant={'secondary'}>100 followers</Badge>
             <Badge variant={'secondary'}>100 following</Badge>
           </div>
@@ -85,9 +98,9 @@ export default function ProfileLayout({}: Route.ComponentProps) {
       </div>
       <div className='flex gap-2'>
         {[
-          { label: 'About', to: '/users/username' },
-          { label: 'Products', to: '/users/username/products' },
-          { label: 'Posts', to: '/users/username/posts' },
+          { label: 'About', to: `/users/${user.username}` },
+          { label: 'Products', to: `/users/${user.username}/products` },
+          { label: 'Posts', to: `/users/${user.username}/posts` },
         ].map((item) => (
           <NavLink
             end
@@ -104,7 +117,12 @@ export default function ProfileLayout({}: Route.ComponentProps) {
         ))}
       </div>
       <div className='max-w-screen-md'>
-        <Outlet />
+        <Outlet
+          context={{
+            headline: user.headline,
+            bio: user.bio,
+          }}
+        />
       </div>
     </div>
   );

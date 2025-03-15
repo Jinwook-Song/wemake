@@ -2,7 +2,7 @@ import type { DateTime } from 'luxon';
 import client from '~/supa-client';
 import { PRODUCTS_PER_PAGE } from './constants';
 
-const productListSelect = `
+export const productListSelect = `
   product_id,
   name,
   tagline,
