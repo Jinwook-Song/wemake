@@ -99,6 +99,13 @@
       "when": 1742027534056,
       "tag": "0013_premium_carlie_cooper",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1742030957016,
+      "tag": "0014_hot_miss_america",
+      "breakpoints": true
     }
   ]
 }
