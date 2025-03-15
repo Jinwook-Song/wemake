@@ -66,6 +66,36 @@ export const getPostById = async (id: string) => {
   return data;
 };
 
+/**
+ * 재귀적으로 댓글을 가져오는 쿼리
+ */
+export const getPostReplies = async (postId: string) => {
+  const replyQuery = `
+    post_reply_id,
+    reply,
+    created_at,
+    user:profiles!inner (
+        name,
+        avatar,
+        username
+      )
+  `;
+
+  const { data, error } = await client
+    .from('post_replies')
+    .select(
+      `
+      ${replyQuery},
+      children:post_replies(
+        ${replyQuery}
+      )
+    `,
+    )
+    .eq('post_id', postId);
+  if (error) throw new Error(error.message);
+  return data;
+};
+
 // export const getPosts = async () => {
 //   const { data, error } = await client.from('posts').select(`
 //       post_id,
