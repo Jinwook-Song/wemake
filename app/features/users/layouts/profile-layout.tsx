@@ -19,6 +19,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { PencilIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { getUserByUsername } from '../queries';
+import client from '~/supa-client';
 
 export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
   const { user } = data;
@@ -30,9 +31,16 @@ export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
 
 export const loader = async ({
   params,
+  request,
 }: Route.LoaderArgs & { params: { username: string } }) => {
   const { username } = params;
   const user = await getUserByUsername(username);
+  if (request.url.endsWith(`/users/${username}`)) {
+    await client.rpc('track_event', {
+      event_type: 'profile_view',
+      event_data: { user_id: user.profile_id },
+    });
+  }
   return { user };
 };
 
@@ -119,6 +127,7 @@ export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
       <div className='max-w-screen-md'>
         <Outlet
           context={{
+            uid: user.profile_id,
             headline: user.headline,
             bio: user.bio,
           }}

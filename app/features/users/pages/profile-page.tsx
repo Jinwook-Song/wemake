@@ -2,7 +2,8 @@ import { useOutletContext } from 'react-router';
 import type { Route } from './+types/profile-page';
 
 export default function ProfilePage() {
-  const { headline, bio } = useOutletContext<{
+  const { uid, headline, bio } = useOutletContext<{
+    uid: string;
     headline: string;
     bio: string;
   }>();

@@ -886,7 +886,13 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      track_event: {
+        Args: {
+          event_type: Database["public"]["Enums"]["event_type"]
+          event_data: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       event_type: "product_view" | "product_visit" | "profile_view"

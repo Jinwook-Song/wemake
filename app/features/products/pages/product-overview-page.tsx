@@ -1,5 +1,13 @@
 import { useOutletContext } from 'react-router';
+import client from '~/supa-client';
+import type { Route } from './+types/product-overview-page';
 
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  await client.rpc('track_event', {
+    event_type: 'product_view',
+    event_data: { product_id: params.productId },
+  });
+};
 export default function ProductOverviewPage() {
   const { description, howItWorks } = useOutletContext<{
     productId: string;
