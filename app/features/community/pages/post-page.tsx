@@ -17,6 +17,8 @@ import {
 import { Textarea } from '~/common/components/ui/textarea';
 import { Badge } from '~/common/components/ui/badge';
 import { Reply } from '~/features/community/components/reply';
+import { getPostById } from '../queries';
+import { DateTime } from 'luxon';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -25,7 +27,13 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function PostPage({}: Route.ComponentProps) {
+export async function loader({ params }: Route.LoaderArgs) {
+  const post = await getPostById(params.postId);
+  return { post };
+}
+
+export default function PostPage({ loaderData }: Route.ComponentProps) {
+  const { post } = loaderData;
   return (
     <div className='space-y-10'>
       <Breadcrumb>
@@ -38,15 +46,15 @@ export default function PostPage({}: Route.ComponentProps) {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to='/community?topic=productivity'>Productivity</Link>
+              <Link to={`/community?topic=${post.topic_slug}`}>
+                {post.topic_name}
+              </Link>
             </BreadcrumbLink>
             <BreadcrumbSeparator />
           </BreadcrumbItem>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to='/community/postId'>
-                What is the best productivity tool?
-              </Link>
+              <Link to={`/community/post/${post.post_id}`}>{post.title}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -56,35 +64,27 @@ export default function PostPage({}: Route.ComponentProps) {
           <div className='w-full flex items-start gap-10'>
             <Button variant={'outline'} className='flex flex-col h-14'>
               <ChevronUpIcon className='size-4 shrink-0' />
-              <span>10</span>
+              <span>{post.upvotes}</span>
             </Button>
             <div className='space-y-20'>
               <div className='space-y-2'>
-                <h2 className='text-3xl font-bold'>
-                  What is the best productivity tool?
-                </h2>
+                <h2 className='text-3xl font-bold'>{post.title}</h2>
                 <div className='flex items-center gap-px text-sm text-muted-foreground'>
-                  <span>@jinwook</span>
+                  <span>{post.author_name}</span>
                   <DotIcon className='size-4' />
-                  <span>12 hours ago</span>
+                  <span>
+                    {DateTime.fromISO(post.author_created_at).toRelative()}
+                  </span>
                   <DotIcon className='size-4' />
-                  <span>10 replies</span>
+                  <span>{post.replies_count} replies</span>
                 </div>
-                <p className='text-muted-foreground w-full'>
-                  I'm looking for a tool that can help me manage my time
-                  effectively and stay organized. I've tried a few basic to-do
-                  list apps but I need something more comprehensive that can
-                  handle task management, time tracking, and maybe even project
-                  planning. What productivity tools have worked well for you?
-                  I'm particularly interested in options that integrate well
-                  with other apps and have good mobile support. Any
-                  recommendations would be greatly appreciated!
-                </p>
+                <p className='text-muted-foreground w-full'>{post.content}</p>
               </div>
               <Form className='w-full flex items-start gap-5'>
+                {/* FIXME: LOGGED IN USER */}
                 <Avatar className='size-14'>
                   <AvatarFallback>J</AvatarFallback>
-                  <AvatarImage src='https://github.com/nvidia.png' />
+                  <AvatarImage src={post.author_avatar} />
                 </Avatar>
                 <div className='flex flex-col items-end gap-5 w-full'>
                   <Textarea
@@ -96,7 +96,7 @@ export default function PostPage({}: Route.ComponentProps) {
                 </div>
               </Form>
               <div className='space-y-10'>
-                <h4 className='font-semibold'>10 Replies</h4>
+                <h4 className='font-semibold'>{post.replies_count} Replies</h4>
                 <div className='flex flex-col gap-5'>
                   <Reply
                     username='jinwook'
@@ -113,17 +113,21 @@ export default function PostPage({}: Route.ComponentProps) {
         <aside className='col-span-2 border rounded-lg shadow-md p-6 space-y-4'>
           <div className='flex gap-5'>
             <Avatar className='size-14'>
-              <AvatarFallback>J</AvatarFallback>
-              <AvatarImage src='https://github.com/jinwook-song.png' />
+              <AvatarFallback>{post.author_name[0]}</AvatarFallback>
+              {post.author_avatar && <AvatarImage src={post.author_avatar} />}
             </Avatar>
-            <div className='flex flex-col'>
-              <h4 className='text-lg font-medium'>Jinwook</h4>
-              <Badge variant={'secondary'}>Entrepreneur</Badge>
+            <div className='flex flex-col items-start'>
+              <h4 className='text-lg font-medium'>{post.author_name}</h4>
+              <Badge variant={'secondary'} className='capitalize'>
+                {post.author_role}
+              </Badge>
             </div>
           </div>
           <div className='text-sm flex flex-col gap-2'>
-            <span>🎂 Joined 3 months ago</span>
-            <span>🚀 Launched 100+ products</span>
+            <span>
+              🎂 Joined {DateTime.fromISO(post.author_created_at).toRelative()}
+            </span>
+            <span>🚀 Launched {post.product_count} products</span>
           </div>
           <Button variant={'outline'} className='w-full'>
             Follow
