@@ -585,7 +585,7 @@ export type Database = {
           icon: string
           name: string
           product_id: number
-          profile_id: string | null
+          profile_id: string
           stats: Json
           tagline: string
           updated_at: string
@@ -599,7 +599,7 @@ export type Database = {
           icon: string
           name: string
           product_id?: never
-          profile_id?: string | null
+          profile_id: string
           stats?: Json
           tagline: string
           updated_at?: string
@@ -613,7 +613,7 @@ export type Database = {
           icon?: string
           name?: string
           product_id?: never
-          profile_id?: string | null
+          profile_id?: string
           stats?: Json
           tagline?: string
           updated_at?: string
@@ -628,7 +628,7 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
           {
-            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            foreignKeyName: "products_to_profiles_fk"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
