@@ -234,7 +234,7 @@ export default function Navigation({
             <DropdownMenuTrigger asChild className='cursor-pointer'>
               <Avatar>
                 {avatar ? (
-                  <AvatarImage src={avatar} />
+                  <AvatarImage src={avatar} className='object-cover' />
                 ) : (
                   <AvatarFallback>{name?.[0]}</AvatarFallback>
                 )}
