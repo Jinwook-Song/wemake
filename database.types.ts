@@ -906,7 +906,11 @@ export type Database = {
       }
     }
     Enums: {
-      event_type: "product_view" | "product_visit" | "profile_view"
+      event_type:
+        | "product_view"
+        | "product_visit"
+        | "profile_view"
+        | "idea_view"
       job_types: "full-time" | "part-time" | "freelance" | "internship"
       locations: "remote" | "in-person" | "hybrid"
       notification_type: "follow" | "review" | "reply" | "mention"

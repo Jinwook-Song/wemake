@@ -1,0 +1,1 @@
+ALTER TYPE "public"."event_type" ADD VALUE 'idea_view';

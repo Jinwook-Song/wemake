@@ -2,7 +2,7 @@ import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/idea-page';
 import { DotIcon, EyeIcon, HeartIcon } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
-import { getGptIdea } from '../queries';
+import { getGptIdea, getGptIdeaViews } from '../queries';
 import { DateTime } from 'luxon';
 import { makeSSRClient } from '~/supa-client';
 
@@ -19,13 +19,21 @@ export const loader = async ({
 }: Route.LoaderArgs) => {
   const { client, headers } = makeSSRClient(request);
 
-  const idea = await getGptIdea(client, { ideaId });
+  await client.rpc('track_event', {
+    event_type: 'idea_view',
+    event_data: { idea_id: ideaId },
+  });
+  const [idea, { count }] = await Promise.all([
+    getGptIdea(client, { ideaId }),
+    getGptIdeaViews(client, { ideaId }),
+  ]);
 
-  return { idea };
+  return { idea, views: count ?? 0 };
 };
 
 export default function IdeaPage({ loaderData }: Route.ComponentProps) {
-  const { idea } = loaderData;
+  const { idea, views } = loaderData;
+
   return (
     <div className='space-y-8'>
       <Hero title={`Idea #${idea.gpt_idea_id}`} />
@@ -34,7 +42,7 @@ export default function IdeaPage({ loaderData }: Route.ComponentProps) {
         <div className='flex items-center text-sm'>
           <div className='flex items-center gap-2'>
             <EyeIcon className='size-4' />
-            <span>{idea.views}</span>
+            <span>{views}</span>
           </div>
           <DotIcon className='size-4' />
           <span>{DateTime.fromISO(idea.created_at).toRelative()}</span>

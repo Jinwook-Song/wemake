@@ -26,3 +26,17 @@ export const getGptIdea = async (
   if (error) throw error;
   return data;
 };
+
+export const getGptIdeaViews = async (
+  client: SupaClient,
+  { ideaId }: { ideaId: string },
+) => {
+  const { count, error } = await client
+    .from('events')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_type', 'idea_view')
+    .eq('event_data->>idea_id', ideaId);
+
+  if (error) throw error;
+  return { count };
+};

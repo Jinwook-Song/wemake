@@ -4,6 +4,7 @@ export const eventType = pgEnum('event_type', [
   'product_view',
   'product_visit',
   'profile_view',
+  'idea_view',
 ]);
 
 export const events = pgTable('events', {
