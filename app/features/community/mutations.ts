@@ -33,12 +33,17 @@ export const createPost = async (
 
 export const createReply = async (
   client: SupaClient,
-  { reply, postId, userId }: { reply: string; postId: number; userId: string },
+  {
+    reply,
+    postId,
+    userId,
+    topLevelId,
+  }: { reply: string; postId: number; userId: string; topLevelId?: number },
 ) => {
   const { error } = await client.from('post_replies').insert({
     reply,
-    post_id: postId,
     profile_id: userId,
+    ...(topLevelId ? { parent_id: topLevelId } : { post_id: postId }),
   });
 
   if (error) throw new Error(error.message);

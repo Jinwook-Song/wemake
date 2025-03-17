@@ -24,6 +24,7 @@ import { z } from 'zod';
 import { createReply } from '../mutations';
 import { getCurrentUserId } from '~/features/users/queries';
 import { useRef } from 'react';
+import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -41,6 +42,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
 const formSchema = z.object({
   reply: z.string().min(1),
+  topLevelId: z.coerce.number().optional(),
 });
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
@@ -51,11 +53,12 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     Object.fromEntries(formData),
   );
   if (!success) return { ok: false, fieldErrors: error.flatten().fieldErrors };
-  const { reply } = data;
+  const { reply, topLevelId } = data;
   await createReply(client, {
     reply,
     postId: +params.postId,
     userId,
+    topLevelId,
   });
 
   return {
@@ -70,16 +73,13 @@ export default function PostPage({
 }: Route.ComponentProps) {
   const { post, replies } = loaderData;
 
-  const { isLoggedIn, avatar } = useOutletContext<{
-    isLoggedIn: boolean;
-    name?: string;
-    username?: string;
-    avatar?: string;
-  }>();
+  const { isLoggedIn, name, avatar } = useAuth();
 
   const navigation = useNavigation();
   const isSubmitting =
-    navigation.state === 'submitting' || navigation.state === 'loading';
+    (navigation.state === 'submitting' &&
+      navigation.formData?.get('topLevelId') === null) ||
+    navigation.state === 'loading';
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -167,11 +167,13 @@ export default function PostPage({
                 <div className='flex flex-col gap-5'>
                   {replies.map((reply) => (
                     <Reply
+                      name={reply.user.name}
                       username={reply.user.username}
                       avatarUrl={reply.user.avatar}
                       content={reply.reply}
                       createdAt={reply.created_at}
                       topLevel={true}
+                      topLevelId={reply.post_reply_id}
                       // @ts-ignore
                       replies={reply.children}
                     />
