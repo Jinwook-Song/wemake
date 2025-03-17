@@ -4,4 +4,6 @@ export const PRODUCT_STAGES = [
   { label: 'Development', value: 'development' },
   { label: 'MVP', value: 'mvp' },
   { label: 'Launched', value: 'launched' },
-];
+] as const;
+
+export type ProductStage = (typeof PRODUCT_STAGES)[number]['value'];
