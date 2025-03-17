@@ -100,7 +100,8 @@ export const getPostReplies = async (
       )
     `,
     )
-    .eq('post_id', postId);
+    .eq('post_id', postId)
+    .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 };

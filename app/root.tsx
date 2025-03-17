@@ -89,7 +89,14 @@ export default function App({ loaderData }: Route.ComponentProps) {
           avatar={profile?.avatar}
         />
       )}
-      <Outlet />
+      <Outlet
+        context={{
+          isLoggedIn,
+          name: profile?.name,
+          username: profile?.username,
+          avatar: profile?.avatar,
+        }}
+      />
     </div>
   );
 }

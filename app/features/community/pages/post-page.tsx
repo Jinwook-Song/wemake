@@ -6,8 +6,8 @@ import {
   BreadcrumbSeparator,
 } from '~/common/components/ui/breadcrumb';
 import type { Route } from './+types/post-page';
-import { Form, Link } from 'react-router';
-import { ChevronUpIcon, DotIcon } from 'lucide-react';
+import { Form, Link, useNavigation, useOutletContext } from 'react-router';
+import { ChevronUpIcon, DotIcon, Loader } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import {
   Avatar,
@@ -20,6 +20,10 @@ import { Reply } from '~/features/community/components/reply';
 import { getPostById, getPostReplies } from '../queries';
 import { DateTime } from 'luxon';
 import { makeSSRClient } from '~/supa-client';
+import { z } from 'zod';
+import { createReply } from '../mutations';
+import { getCurrentUserId } from '~/features/users/queries';
+import { useRef } from 'react';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -29,14 +33,56 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-  const { client, headers } = makeSSRClient(request);
+  const { client } = makeSSRClient(request);
   const post = await getPostById(client, { postId: params.postId });
   const replies = await getPostReplies(client, { postId: params.postId });
   return { post, replies };
 }
 
-export default function PostPage({ loaderData }: Route.ComponentProps) {
+const formSchema = z.object({
+  reply: z.string().min(1),
+});
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(
+    Object.fromEntries(formData),
+  );
+  if (!success) return { ok: false, fieldErrors: error.flatten().fieldErrors };
+  const { reply } = data;
+  await createReply(client, {
+    reply,
+    postId: +params.postId,
+    userId,
+  });
+
+  return {
+    ok: true,
+    fieldErrors: null,
+  };
+};
+
+export default function PostPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { post, replies } = loaderData;
+
+  const { isLoggedIn, avatar } = useOutletContext<{
+    isLoggedIn: boolean;
+    name?: string;
+    username?: string;
+    avatar?: string;
+  }>();
+
+  const navigation = useNavigation();
+  const isSubmitting =
+    navigation.state === 'submitting' || navigation.state === 'loading';
+
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
     <div className='space-y-10'>
       <Breadcrumb>
@@ -81,21 +127,41 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                 </div>
                 <p className='text-muted-foreground w-full'>{post.content}</p>
               </div>
-              <Form className='w-full flex items-start gap-5'>
-                {/* FIXME: LOGGED IN USER */}
-                <Avatar className='size-14'>
-                  <AvatarFallback>J</AvatarFallback>
-                  <AvatarImage src={post.author_avatar} />
-                </Avatar>
-                <div className='flex flex-col items-end gap-5 w-full'>
-                  <Textarea
-                    className='w-full resize-none'
-                    placeholder='Write a reply'
-                    rows={5}
-                  />
-                  <Button className=''>Reply</Button>
-                </div>
-              </Form>
+              {isLoggedIn && (
+                <Form
+                  ref={(node) => {
+                    formRef.current = node;
+                    if (actionData?.ok) formRef.current?.reset();
+                  }}
+                  method='post'
+                  className='w-full flex items-start gap-5'
+                >
+                  {/* FIXME: LOGGED IN USER */}
+                  <Avatar className='size-14'>
+                    <AvatarFallback>{name?.[0]}</AvatarFallback>
+                    <AvatarImage src={avatar} />
+                  </Avatar>
+                  <div className='flex flex-col items-end gap-5 w-full'>
+                    <Textarea
+                      name='reply'
+                      className='w-full resize-none'
+                      placeholder='Write a reply'
+                      rows={5}
+                    />
+                    <Button
+                      type='submit'
+                      disabled={isSubmitting}
+                      className='min-w-20'
+                    >
+                      {isSubmitting ? (
+                        <Loader className='size-4 animate-spin' />
+                      ) : (
+                        'Reply'
+                      )}
+                    </Button>
+                  </div>
+                </Form>
+              )}
               <div className='space-y-10'>
                 <h4 className='font-semibold'>{post.replies_count} Replies</h4>
                 <div className='flex flex-col gap-5'>
