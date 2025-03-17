@@ -1,10 +1,22 @@
 import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/submit-job-page';
-import { Form } from 'react-router';
+import { Form, redirect, useNavigation } from 'react-router';
 import { InputPair } from '~/common/components/input-pair';
 import { SelectPair } from '~/common/components/select-pair';
-import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGES } from '../constants';
+import {
+  JOB_TYPES,
+  LOCATION_TYPES,
+  SALARY_RANGES,
+  type JobType,
+  type LocationType,
+  type SalaryRange,
+} from '../constants';
 import { Button } from '~/common/components/ui/button';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId } from '~/features/users/queries';
+import { z } from 'zod';
+import { createJob } from '../mutations';
+import { Loader } from 'lucide-react';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -13,14 +25,58 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function SubmitJobPage({}: Route.ComponentProps) {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  await getCurrentUserId(client);
+};
+
+export const formSchema = z.object({
+  position: z.string().min(1).max(40),
+  overview: z.string().min(1).max(400),
+  responsibilities: z.string().min(1).max(400),
+  qualifications: z.string().min(1).max(400),
+  benefits: z.string().min(1).max(400),
+  skills: z.string().min(1).max(400),
+  companyName: z.string().min(1).max(40),
+  companyLogoUrl: z.string().min(1).max(40),
+  companyLocation: z.string().min(1).max(40),
+  applyUrl: z.string().min(1).max(40),
+  jobType: z.enum(JOB_TYPES.map((type) => type.value) as [JobType]),
+  jobLocation: z.enum(
+    LOCATION_TYPES.map((location) => location.value) as [LocationType],
+  ),
+  salaryRange: z.enum(
+    SALARY_RANGES.map((range) => range.value) as [SalaryRange],
+  ),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(
+    Object.fromEntries(formData),
+  );
+  if (!success) return { fieldErrors: error.flatten().fieldErrors };
+  const { job_id } = await createJob(client, data, userId);
+  return redirect(`/jobs/${job_id}`);
+};
+
+export default function SubmitJobPage({ actionData }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const isSubmitting =
+    navigation.state === 'submitting' || navigation.state === 'loading';
+
   return (
     <div>
       <Hero
         title='Post a Job'
         description='Reach the right candidates with wemake.'
       />
-      <Form className='max-w-screen-2xl mx-auto flex flex-col items-center gap-10'>
+      <Form
+        method='post'
+        className='max-w-screen-2xl mx-auto flex flex-col items-center gap-10'
+      >
         <div className='w-full grid grid-cols-3 gap-10'>
           <InputPair
             id='position'
@@ -32,6 +88,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             required
             placeholder='i.e. Frontend Developer'
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.position?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='overview'
             name='overview'
@@ -43,6 +104,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             placeholder='i.e. We are looking for a Frontend Developer to join our team.'
             textArea
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.overview?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='responsibilities'
             name='responsibilities'
@@ -54,6 +120,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             placeholder='i.e. Implement UI, Develop features, etc.'
             textArea
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.responsibilities?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='qualifications'
             name='qualifications'
@@ -65,6 +136,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             placeholder='i.e. 3+ years of experience, Bachelor’s degree, etc.'
             textArea
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.qualifications?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='benefits'
             name='benefits'
@@ -76,6 +152,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             placeholder='i.e. Health insurance, Dental insurance, etc.'
             textArea
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.benefits?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='skills'
             name='skills'
@@ -87,6 +168,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             placeholder='i.e. React, TypeScript, etc.'
             textArea
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.skills?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='companyName'
             name='companyName'
@@ -97,6 +183,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             required
             placeholder='i.e. wemake'
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.companyName?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='companyLogoUrl'
             name='companyLogoUrl'
@@ -107,6 +198,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             required
             placeholder='i.e. https://wemake.com/logo.png'
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.companyLogoUrl?.join(', ')}
+            </p>
+          )}
           <InputPair
             id='companyLocation'
             name='companyLocation'
@@ -117,8 +213,13 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             required
             placeholder='i.e. Remote, Seoul, etc.'
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.companyLocation?.join(', ')}
+            </p>
+          )}
           <InputPair
-            id='applyUrl    '
+            id='applyUrl'
             name='applyUrl'
             label='Apply URL'
             description='(40 characters max)'
@@ -127,6 +228,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
             required
             placeholder='i.e. https://wemake.com/apply'
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.applyUrl?.join(', ')}
+            </p>
+          )}
           <SelectPair
             name='jobType'
             label='Job Type'
@@ -138,6 +244,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
               label: type.label,
             }))}
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.jobType?.join(', ')}
+            </p>
+          )}
           <SelectPair
             name='jobLocation'
             label='Job Location'
@@ -149,6 +260,11 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
               label: location.label,
             }))}
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.jobLocation?.join(', ')}
+            </p>
+          )}
           <SelectPair
             name='salaryRange'
             label='Salary Range'
@@ -160,9 +276,23 @@ export default function SubmitJobPage({}: Route.ComponentProps) {
               label: range.label,
             }))}
           />
+          {actionData && 'fieldErrors' in actionData && (
+            <p className='text-sm text-red-500'>
+              {actionData.fieldErrors?.salaryRange?.join(', ')}
+            </p>
+          )}
         </div>
-        <Button type='submit' size='lg' className='w-full max-w-sm mx-auto'>
-          Post job for $100
+        <Button
+          type='submit'
+          size='lg'
+          className='w-full max-w-sm mx-auto'
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader className='w-4 h-4 animate-spin' />
+          ) : (
+            'Post job for $100'
+          )}
         </Button>
       </Form>
     </div>

@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ALTER COLUMN "profile_id" SET NOT NULL;

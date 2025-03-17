@@ -58,7 +58,16 @@ export const getJobById = async (
 ) => {
   const { data, error } = await client
     .from('jobs')
-    .select('*')
+    .select(
+      `
+      *,
+      user:profiles!inner (
+        name,
+        avatar,
+        username
+      )
+      `,
+    )
     .eq('job_id', jobId)
     .single();
 

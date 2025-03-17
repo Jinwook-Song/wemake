@@ -1,5 +1,13 @@
-import { bigint, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGES } from './constants';
+import { profiles } from '../users/schema';
 
 export const jobTypes = pgEnum(
   'job_types',
@@ -31,6 +39,11 @@ export const jobs = pgTable('jobs', {
   job_type: jobTypes().notNull(),
   location_type: locations().notNull(),
   salary_range: salaryRanges().notNull(),
+  profile_id: uuid()
+    .references(() => profiles.profile_id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });

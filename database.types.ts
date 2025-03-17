@@ -175,6 +175,7 @@ export type Database = {
           location_type: Database["public"]["Enums"]["locations"]
           overview: string
           position: string
+          profile_id: string
           qualifications: string
           responsibilities: string
           salary_range: Database["public"]["Enums"]["salary_ranges"]
@@ -193,6 +194,7 @@ export type Database = {
           location_type: Database["public"]["Enums"]["locations"]
           overview: string
           position: string
+          profile_id: string
           qualifications: string
           responsibilities: string
           salary_range: Database["public"]["Enums"]["salary_ranges"]
@@ -211,13 +213,22 @@ export type Database = {
           location_type?: Database["public"]["Enums"]["locations"]
           overview?: string
           position?: string
+          profile_id?: string
           qualifications?: string
           responsibilities?: string
           salary_range?: Database["public"]["Enums"]["salary_ranges"]
           skills?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       message_room_members: {
         Row: {
