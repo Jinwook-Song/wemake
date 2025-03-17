@@ -1,5 +1,6 @@
 import type { SupaClient } from '~/supa-client';
 import { productListSelect } from '../products/queries';
+import { redirect } from 'react-router';
 
 export const getUserByUsername = async (
   client: SupaClient,
@@ -76,4 +77,12 @@ export const getUserPosts = async (
     .eq('username', username);
   if (error) throw error;
   return data;
+};
+
+export const getCurrentUserId = async (client: SupaClient) => {
+  const { data, error } = await client.auth.getUser();
+  if (error || !data.user) {
+    throw redirect('/auth/login');
+  }
+  return data.user.id;
 };
