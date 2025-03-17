@@ -18,7 +18,9 @@ export const loader = async ({
   request,
 }: Route.LoaderArgs) => {
   const { client, headers } = makeSSRClient(request);
+
   const idea = await getGptIdea(client, { ideaId });
+
   return { idea };
 };
 

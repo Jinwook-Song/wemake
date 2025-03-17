@@ -2,6 +2,7 @@ import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/categories-page';
 import { CategoryCard } from '../components/category-card';
 import { getCategories } from '../queries';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -11,7 +12,8 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const categories = await getCategories();
+  const { client } = makeSSRClient(request);
+  const categories = await getCategories(client);
 
   return { categories };
 }

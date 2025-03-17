@@ -10,6 +10,7 @@ import {
 import { z } from 'zod';
 import { data } from 'react-router';
 import { PRODUCTS_PER_PAGE } from '../constants';
+import { makeSSRClient } from '~/supa-client';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -44,14 +45,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     );
   }
 
+  const { client } = makeSSRClient(request);
+
   const [category, products, pageCount] = await Promise.all([
-    getCategoryById(parsedDataParams.category),
-    getProductsByCategoryId({
+    getCategoryById(client, { categoryId: parsedDataParams.category }),
+    getProductsByCategoryId(client, {
       categoryId: parsedDataParams.category,
       page: parsedDataSearchParams.page,
       limit: PRODUCTS_PER_PAGE,
     }),
-    getCategoryPageCount(parsedDataParams.category),
+    getCategoryPageCount(client, { categoryId: parsedDataParams.category }),
   ]);
 
   return { category, products, pageCount };

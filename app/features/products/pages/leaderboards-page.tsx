@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import { ProductCard } from '../components/product-card';
 import { getProductsByDateRnage } from '../queries';
 import { DateTime } from 'luxon';
-
+import { makeSSRClient } from '~/supa-client';
 export const meta: Route.MetaFunction = () => {
   return [
     { title: 'Leaderboards | wemake' },
@@ -16,26 +16,27 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  const dailyProductsPromise = getProductsByDateRnage({
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const dailyProductsPromise = getProductsByDateRnage(client, {
     startDate: DateTime.now().startOf('day'),
     endDate: DateTime.now().endOf('day'),
     limit: 7,
   });
 
-  const weeklyProductsPromise = getProductsByDateRnage({
+  const weeklyProductsPromise = getProductsByDateRnage(client, {
     startDate: DateTime.now().startOf('week'),
     endDate: DateTime.now().endOf('week'),
     limit: 7,
   });
 
-  const monthlyProductsPromise = getProductsByDateRnage({
+  const monthlyProductsPromise = getProductsByDateRnage(client, {
     startDate: DateTime.now().startOf('month'),
     endDate: DateTime.now().endOf('month'),
     limit: 7,
   });
 
-  const yearlyProductsPromise = getProductsByDateRnage({
+  const yearlyProductsPromise = getProductsByDateRnage(client, {
     startDate: DateTime.now().startOf('year'),
     endDate: DateTime.now().endOf('year'),
     limit: 7,
