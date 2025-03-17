@@ -75,9 +75,7 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                 <div className='flex items-center gap-px text-sm text-muted-foreground'>
                   <span>{post.author_name}</span>
                   <DotIcon className='size-4' />
-                  <span>
-                    {DateTime.fromISO(post.author_created_at).toRelative()}
-                  </span>
+                  <span>{DateTime.fromISO(post.created_at).toRelative()}</span>
                   <DotIcon className='size-4' />
                   <span>{post.replies_count} replies</span>
                 </div>
