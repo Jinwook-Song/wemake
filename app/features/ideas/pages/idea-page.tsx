@@ -5,6 +5,9 @@ import { Button } from '~/common/components/ui/button';
 import { getGptIdea, getGptIdeaViews } from '../queries';
 import { DateTime } from 'luxon';
 import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId } from '~/features/users/queries';
+import { Form, redirect } from 'react-router';
+import { claimIdea } from '../mutations';
 
 export const meta: Route.MetaFunction = ({ data: { idea } }) => {
   return [
@@ -19,18 +22,31 @@ export const loader = async ({
 }: Route.LoaderArgs) => {
   const { client, headers } = makeSSRClient(request);
 
-  await client.rpc('track_event', {
-    event_type: 'idea_view',
-    event_data: { idea_id: ideaId },
-  });
   const [idea, { count }] = await Promise.all([
     getGptIdea(client, { ideaId }),
     getGptIdeaViews(client, { ideaId }),
   ]);
 
+  if (idea.claimed) return redirect('/ideas');
+
+  await client.rpc('track_event', {
+    event_type: 'idea_view',
+    event_data: { idea_id: ideaId },
+  });
   return { idea, views: count ?? 0 };
 };
 
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const idea = await getGptIdea(client, { ideaId: params.ideaId });
+
+  if (idea.claimed) return { ok: false };
+
+  await claimIdea(client, { ideaId: params.ideaId, userId });
+
+  return redirect('/my/dashboard/ideas');
+};
 export default function IdeaPage({ loaderData }: Route.ComponentProps) {
   const { idea, views } = loaderData;
 
@@ -52,7 +68,11 @@ export default function IdeaPage({ loaderData }: Route.ComponentProps) {
             <span>{idea.likes}</span>
           </Button>
         </div>
-        <Button size={'lg'}>Claim idea now &rarr;</Button>
+        {!idea.claimed && (
+          <Form method='post'>
+            <Button size={'lg'}>Claim idea now &rarr;</Button>
+          </Form>
+        )}
       </div>
     </div>
   );

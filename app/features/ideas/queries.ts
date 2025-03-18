@@ -40,3 +40,16 @@ export const getGptIdeaViews = async (
   if (error) throw error;
   return { count };
 };
+
+export const getClaimedIdeas = async (
+  client: SupaClient,
+  { userId }: { userId: string },
+) => {
+  const { data, error } = await client
+    .from('gpt_ideas')
+    .select('gpt_idea_id, idea, claimed_at')
+    .eq('claimed_by', userId);
+
+  if (error) throw error;
+  return data;
+};

@@ -1,7 +1,10 @@
 CREATE OR REPLACE VIEW gpt_ideas_view AS
 SELECT
     i.gpt_idea_id,
-    i.idea,
+    CASE 
+        WHEN i.claimed_at IS NULL THEN i.idea 
+        ELSE 'XXXXXXClaimedXXXXXX' 
+    END AS idea,
     i.views,
     CASE WHEN i.claimed_at IS NOT NULL THEN true ELSE false END AS claimed,
     COUNT(l.gpt_idea_id) AS likes,
