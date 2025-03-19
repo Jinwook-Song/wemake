@@ -713,8 +713,8 @@ export type Database = {
       reviews: {
         Row: {
           created_at: string
-          product_id: number | null
-          profile_id: string | null
+          product_id: number
+          profile_id: string
           rating: number
           review: string
           review_id: number
@@ -722,8 +722,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          product_id?: number | null
-          profile_id?: string | null
+          product_id: number
+          profile_id: string
           rating: number
           review: string
           review_id?: never
@@ -731,8 +731,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          product_id?: number | null
-          profile_id?: string | null
+          product_id?: number
+          profile_id?: string
           rating?: number
           review?: string
           review_id?: never
@@ -897,6 +897,15 @@ export type Database = {
       }
     }
     Functions: {
+      get_dashboard_stats: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          views: number
+          month: string
+        }[]
+      }
       track_event: {
         Args: {
           event_type: Database["public"]["Enums"]["event_type"]

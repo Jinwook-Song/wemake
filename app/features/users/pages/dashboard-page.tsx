@@ -12,6 +12,8 @@ import {
   type ChartConfig,
 } from '~/common/components/ui/chart';
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId } from '../queries';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -20,14 +22,24 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-const chartData = [
-  { month: 'January', views: 186 },
-  { month: 'February', views: 305 },
-  { month: 'March', views: 237 },
-  { month: 'April', views: 73 },
-  { month: 'May', views: 209 },
-  { month: 'June', views: 214 },
-];
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const { data: chartData, error } = await client.rpc('get_dashboard_stats', {
+    user_id: userId,
+  });
+  if (error) throw error;
+  return { chartData };
+};
+
+// const chartData = [
+//   { month: 'January', views: 186 },
+//   { month: 'February', views: 305 },
+//   { month: 'March', views: 237 },
+//   { month: 'April', views: 73 },
+//   { month: 'May', views: 209 },
+//   { month: 'June', views: 214 },
+// ];
 const chartConfig = {
   views: {
     label: '📊',
@@ -35,7 +47,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function DashboardPage({}: Route.ComponentProps) {
+export default function DashboardPage({ loaderData }: Route.ComponentProps) {
+  const { chartData } = loaderData;
   return (
     <div className='space-y-5'>
       <h1 className='text-2xl font-bold mb-6'>Dashboard</h1>
@@ -59,7 +72,7 @@ export default function DashboardPage({}: Route.ComponentProps) {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
+                padding={{ left: 12, right: 12 }}
               />
               <ChartTooltip
                 cursor={false}

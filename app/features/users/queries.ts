@@ -47,7 +47,7 @@ export const getUserById = async (
   return data;
 };
 
-export const getUserProducts = async (
+export const getProductsByUsername = async (
   client: SupaClient,
   { username }: { username: string },
 ) => {
@@ -62,6 +62,19 @@ export const getUserProducts = async (
         `,
     )
     .eq('profiles.username', username);
+  if (error) throw error;
+
+  return data;
+};
+
+export const getProductsByUserId = async (
+  client: SupaClient,
+  { profileId }: { profileId: string },
+) => {
+  const { data, error } = await client
+    .from('products')
+    .select('name, product_id')
+    .eq('profile_id', profileId);
   if (error) throw error;
 
   return data;

@@ -36,7 +36,11 @@ export const loader = async ({
   const { username } = params;
   const { client, headers } = makeSSRClient(request);
   const user = await getUserByUsername(client, { username });
-  if (request.url.endsWith(`/users/${username}`)) {
+
+  const url = new URL(request.url);
+  const decodedPathname = decodeURIComponent(url.pathname);
+  const decodedUsername = decodeURIComponent(username);
+  if (decodedPathname === `/users/${decodedUsername}`) {
     await client.rpc('track_event', {
       event_type: 'profile_view',
       event_data: { user_id: user.profile_id },
