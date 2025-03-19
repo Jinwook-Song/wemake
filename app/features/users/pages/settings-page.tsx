@@ -54,9 +54,9 @@ export const action = async ({ request }: Route.ActionArgs) => {
     else {
       const { data, error } = await client.storage
         .from('avatars')
-        .upload(profileId, avatar, {
+        .upload(`${profileId}/${Date.now()}`, avatar, {
           contentType: avatar.type,
-          upsert: true,
+          upsert: false,
         });
       if (error) return { fileErrors: { avatar: [error.message] } };
 
