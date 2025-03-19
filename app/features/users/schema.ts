@@ -11,6 +11,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { products } from '../products/schema';
 import { posts } from '../community/schema';
+import { USER_ROLES } from './constant';
 
 // only for typescript
 // ! migration file에서 제거해야한다
@@ -18,13 +19,10 @@ export const users = pgSchema('auth').table('users', {
   id: uuid().primaryKey(),
 });
 
-export const roles = pgEnum('role', [
-  'developer',
-  'designer',
-  'marketer',
-  'founder',
-  'product-manager',
-]);
+export const roles = pgEnum(
+  'role',
+  USER_ROLES.map((role) => role.value) as [string, ...string[]],
+);
 
 export const profiles = pgTable('profiles', {
   profile_id: uuid()

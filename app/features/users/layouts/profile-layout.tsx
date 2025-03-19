@@ -20,6 +20,7 @@ import { PencilIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { getUserByUsername } from '../queries';
 import { makeSSRClient } from '~/supa-client';
+import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
   const { user } = data;
@@ -34,7 +35,7 @@ export const loader = async ({
   request,
 }: Route.LoaderArgs & { params: { username: string } }) => {
   const { username } = params;
-  const { client, headers } = makeSSRClient(request);
+  const { client } = makeSSRClient(request);
   const user = await getUserByUsername(client, { username });
 
   const url = new URL(request.url);
@@ -49,55 +50,70 @@ export const loader = async ({
   return { user };
 };
 
-export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
+export default function ProfileLayout({
+  loaderData,
+  params,
+}: Route.ComponentProps & { params: { username: string } }) {
   const { user } = loaderData;
+  const { isLoggedIn, username } = useAuth();
+  const isMe = isLoggedIn && username === params.username;
+  const isNotMe = isLoggedIn && username !== params.username;
+
   return (
     <div className='space-y-10'>
       <div className='flex items-center gap-5'>
         <Avatar className='size-40'>
           <AvatarFallback className='text-3xl'>{user.name[0]}</AvatarFallback>
-          {user.avatar && <AvatarImage src={user.avatar} />}
+          {user.avatar && (
+            <AvatarImage src={user.avatar} className='object-cover' />
+          )}
         </Avatar>
         <div className='flex flex-col gap-4'>
           <div className='flex gap-2 items-center'>
             <h1 className='text-4xl font-bold'>{user.name}</h1>
-            <Button size={'lg'} variant={'outline'} asChild>
-              <Link to='/my/settings'>
-                <PencilIcon className='size-4' />
-                <span>Edit profile</span>
-              </Link>
-            </Button>
-            <Button size={'lg'} variant={'secondary'}>
-              Follow
-            </Button>
-            <Dialog>
-              <DialogTrigger>
+            {isMe && (
+              <Button size={'lg'} variant={'outline'} asChild>
+                <Link to='/my/settings'>
+                  <PencilIcon className='size-4' />
+                  <span>Edit profile</span>
+                </Link>
+              </Button>
+            )}
+            {isNotMe && (
+              <>
                 <Button size={'lg'} variant={'secondary'}>
-                  Message
+                  Follow
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Message</DialogTitle>
-                </DialogHeader>
-                <DialogDescription className='space-y-1'>
-                  <span className='text-muted-foreground'>
-                    Send a message to Jinwook to get in touch.
-                  </span>
-                  <Form className='space-y-5'>
-                    <Textarea
-                      placeholder='Message'
-                      className='resize-none'
-                      rows={4}
-                      required
-                    />
-                    <Button type='submit' className='block ml-auto'>
-                      Send
+                <Dialog>
+                  <DialogTrigger>
+                    <Button size={'lg'} variant={'secondary'}>
+                      Message
                     </Button>
-                  </Form>
-                </DialogDescription>
-              </DialogContent>
-            </Dialog>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Message</DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription className='space-y-1'>
+                      <span className='text-muted-foreground'>
+                        Send a message to Jinwook to get in touch.
+                      </span>
+                      <Form className='space-y-5'>
+                        <Textarea
+                          placeholder='Message'
+                          className='resize-none'
+                          rows={4}
+                          required
+                        />
+                        <Button type='submit' className='block ml-auto'>
+                          Send
+                        </Button>
+                      </Form>
+                    </DialogDescription>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
           </div>
           <div className='flex gap-2 items-center'>
             <span className='text-sm text-muted-foreground'>

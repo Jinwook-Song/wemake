@@ -8,6 +8,16 @@ import { cn } from '~/lib/utils';
 import { UserIcon } from 'lucide-react';
 import { Input } from '~/common/components/ui/input';
 import { Button } from '~/common/components/ui/button';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId, getUserById } from '../queries';
+import { USER_ROLES, type UserRole } from '../constant';
+import { z } from 'zod';
+import { updateUser } from '../mutations';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '~/common/components/ui/alert';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -16,7 +26,39 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function SettingsPage({}: Route.ComponentProps) {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const profileId = await getCurrentUserId(client);
+  const user = await getUserById(client, { profileId });
+  return { user };
+};
+
+export const formSchema = z.object({
+  name: z.string().min(1),
+  role: z.enum(USER_ROLES.map((role) => role.value) as [UserRole]),
+  headline: z.string().min(1).optional(),
+  bio: z.string().min(1).optional(),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const profileId = await getCurrentUserId(client);
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(
+    Object.fromEntries(formData),
+  );
+  if (!success) return { ok: false, fieldErrors: error.flatten().fieldErrors };
+
+  await updateUser(client, data, profileId);
+  return { ok: true, fieldErrors: null };
+};
+
+export default function SettingsPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const { user } = loaderData;
+
   const [avatar, setAvatar] = useState<string | null>(null);
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,8 +69,14 @@ export default function SettingsPage({}: Route.ComponentProps) {
     <div className='space-y-20'>
       <div className='grid grid-cols-6 gap-40 items-start'>
         <div className='col-span-4 flex flex-col gap-10'>
+          {actionData?.ok && (
+            <Alert>
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>Profile updated successfully</AlertDescription>
+            </Alert>
+          )}
           <h2 className='text-2xl font-semibold'>Edit profile</h2>
-          <Form className='flex flex-col gap-5 w-1/2'>
+          <Form method='post' className='flex flex-col gap-5 w-1/2'>
             <InputPair
               id='name'
               name='name'
@@ -37,19 +85,30 @@ export default function SettingsPage({}: Route.ComponentProps) {
               placeholder='John Doe'
               type='text'
               required
+              defaultValue={user.name}
             />
+            {actionData?.fieldErrors?.name && (
+              <p className='text-red-500'>
+                {actionData.fieldErrors.name.join(', ')}
+              </p>
+            )}
             <SelectPair
               name='role'
               label='Role'
               description='What role do you identify the most with'
               placeholder='Select a role'
-              options={[
-                { label: 'Software Engineer', value: 'software-engineer' },
-                { label: 'Product Manager', value: 'product-manager' },
-                { label: 'UI/UX Designer', value: 'ui-ux-designer' },
-              ]}
+              options={USER_ROLES.map((role) => ({
+                value: role.value,
+                label: role.label,
+              }))}
               required
+              defaultValue={user.role}
             />
+            {actionData?.fieldErrors?.role && (
+              <p className='text-red-500'>
+                {actionData.fieldErrors.role.join(', ')}
+              </p>
+            )}
             <InputPair
               id='headline'
               name='headline'
@@ -59,7 +118,13 @@ export default function SettingsPage({}: Route.ComponentProps) {
               type='text'
               required
               textArea
+              defaultValue={user.headline ?? ''}
             />
+            {actionData?.fieldErrors?.headline && (
+              <p className='text-red-500'>
+                {actionData.fieldErrors.headline.join(', ')}
+              </p>
+            )}
             <InputPair
               id='bio'
               name='bio'
@@ -69,7 +134,13 @@ export default function SettingsPage({}: Route.ComponentProps) {
               type='text'
               required
               textArea
+              defaultValue={user.bio ?? ''}
             />
+            {actionData?.fieldErrors?.bio && (
+              <p className='text-red-500'>
+                {actionData.fieldErrors.bio.join(', ')}
+              </p>
+            )}
             <Button type='submit' size={'lg'} className='w-full'>
               Update Profile
             </Button>
