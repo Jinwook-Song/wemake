@@ -1,6 +1,7 @@
 import type { DateTime } from 'luxon';
 import { PRODUCTS_PER_PAGE } from './constants';
 import type { SupaClient } from '~/supa-client';
+import { redirect } from 'react-router';
 
 export const productListSelect = `
   product_id,
@@ -187,4 +188,18 @@ export const getProductReviews = async (
   if (error) throw error;
 
   return data;
+};
+
+export const productOwnerCheck = async (
+  client: SupaClient,
+  { productId, userId }: { productId: number; userId: string },
+) => {
+  const { error } = await client
+    .from('products')
+    .select('product_id')
+    .eq('product_id', productId)
+    .eq('profile_id', userId)
+    .single();
+
+  if (error) throw redirect('/my/dashboard/products');
 };

@@ -19,6 +19,9 @@ import {
   XAxis,
 } from 'recharts';
 import type { Route } from './+types/dashboard-product-page';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId } from '../queries';
+import { productOwnerCheck } from '~/features/products/queries';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -27,14 +30,23 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-const chartData = [
-  { month: 'January', views: 186, visitors: 100 },
-  { month: 'February', views: 305, visitors: 34 },
-  { month: 'March', views: 237, visitors: 65 },
-  { month: 'April', views: 73, visitors: 27 },
-  { month: 'May', views: 209, visitors: 120 },
-  { month: 'June', views: 214, visitors: 230 },
-];
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  await productOwnerCheck(client, {
+    productId: Number(params.productId),
+    userId,
+  });
+
+  const { data: chartData, error } = await client.rpc('get_product_stats', {
+    product_id: params.productId,
+  });
+
+  if (error) throw error;
+
+  return { chartData };
+};
+
 const chartConfig = {
   views: {
     label: 'Page views',
@@ -46,7 +58,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function DashboardProductPage({}: Route.ComponentProps) {
+export default function DashboardProductPage({
+  loaderData,
+}: Route.ComponentProps) {
+  const { chartData } = loaderData;
   return (
     <div className='space-y-5'>
       <h1 className='text-2xl font-bold mb-6'>Analytics</h1>
@@ -70,7 +85,7 @@ export default function DashboardProductPage({}: Route.ComponentProps) {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
+                padding={{ left: 12, right: 12 }}
               />
               <ChartTooltip
                 cursor={false}
@@ -88,7 +103,7 @@ export default function DashboardProductPage({}: Route.ComponentProps) {
                 dot={false}
               />
               <Area
-                dataKey='visitors'
+                dataKey='visits'
                 type='natural'
                 fill='var(--color-visitors)'
                 stroke='var(--color-visitors)'
