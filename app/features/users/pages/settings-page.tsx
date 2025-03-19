@@ -1,18 +1,18 @@
-import { Form } from 'react-router';
+import { Form, useNavigation } from 'react-router';
 import type { Route } from './+types/settings-page';
 import { InputPair } from '~/common/components/input-pair';
 import { SelectPair } from '~/common/components/select-pair';
 import { useState } from 'react';
 import { Label } from '~/common/components/ui/label';
 import { cn } from '~/lib/utils';
-import { UserIcon } from 'lucide-react';
+import { Loader, UserIcon } from 'lucide-react';
 import { Input } from '~/common/components/ui/input';
 import { Button } from '~/common/components/ui/button';
 import { makeSSRClient } from '~/supa-client';
 import { getCurrentUserId, getUserById } from '../queries';
 import { USER_ROLES, type UserRole } from '../constant';
 import { z } from 'zod';
-import { updateUser } from '../mutations';
+import { updateUser, updateUserAvatar } from '../mutations';
 import {
   Alert,
   AlertDescription,
@@ -44,13 +44,39 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const { client } = makeSSRClient(request);
   const profileId = await getCurrentUserId(client);
   const formData = await request.formData();
-  const { success, data, error } = formSchema.safeParse(
-    Object.fromEntries(formData),
-  );
-  if (!success) return { ok: false, fieldErrors: error.flatten().fieldErrors };
+  const avatar = formData.get('avatar');
+  if (avatar && avatar instanceof File) {
+    // 2MB
+    if (avatar.size > 2 * 1024 * 1024)
+      return { fileErrors: { avatar: ['File size is too large'] } };
+    else if (!avatar.type.startsWith('image/'))
+      return { fileErrors: { avatar: ['Invalid file type'] } };
+    else {
+      const { data, error } = await client.storage
+        .from('avatars')
+        .upload(profileId, avatar, {
+          contentType: avatar.type,
+          upsert: true,
+        });
+      if (error) return { fileErrors: { avatar: [error.message] } };
 
-  await updateUser(client, data, profileId);
-  return { ok: true, fieldErrors: null };
+      const {
+        data: { publicUrl },
+      } = client.storage.from('avatars').getPublicUrl(data.path);
+
+      await updateUserAvatar(client, publicUrl, profileId);
+
+      return { ok: true };
+    }
+  } else {
+    const { success, data, error } = formSchema.safeParse(
+      Object.fromEntries(formData),
+    );
+    if (!success) return { fieldErrors: error.flatten().fieldErrors };
+
+    await updateUser(client, data, profileId);
+    return { ok: true };
+  }
 };
 
 export default function SettingsPage({
@@ -59,11 +85,23 @@ export default function SettingsPage({
 }: Route.ComponentProps) {
   const { user } = loaderData;
 
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(loaderData.user.avatar);
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setAvatar(URL.createObjectURL(file));
   };
+
+  const navigation = useNavigation();
+
+  const isUpdatingProfile =
+    (navigation.state === 'submitting' &&
+      navigation.formData?.get('avatar') === null) ||
+    navigation.state === 'loading';
+
+  const isUpdatingAvatar =
+    (navigation.state === 'submitting' &&
+      navigation.formData?.get('avatar') !== null) ||
+    navigation.state === 'loading';
 
   return (
     <div className='space-y-20'>
@@ -141,12 +179,25 @@ export default function SettingsPage({
                 {actionData.fieldErrors.bio.join(', ')}
               </p>
             )}
-            <Button type='submit' size={'lg'} className='w-full'>
-              Update Profile
+            <Button
+              type='submit'
+              size={'lg'}
+              className='w-full'
+              disabled={isUpdatingProfile}
+            >
+              {isUpdatingProfile ? (
+                <Loader className='w-4 h-4 animate-spin' />
+              ) : (
+                'Update Profile'
+              )}
             </Button>
           </Form>
         </div>
-        <aside className='col-span-2 space-y-4 p-6 rounded-lg shadow-md border'>
+        <Form
+          method='post'
+          encType='multipart/form-data'
+          className='col-span-2 space-y-4 p-6 rounded-lg shadow-md border'
+        >
           <div className='flex flex-col gap-4'>
             <Label htmlFor='avatar' className='flex flex-col gap-1'>
               Avatar
@@ -179,6 +230,11 @@ export default function SettingsPage({
               required
               onChange={onChange}
             />
+            {actionData?.fileErrors?.avatar && (
+              <p className='text-red-500'>
+                {actionData.fileErrors.avatar.join(', ')}
+              </p>
+            )}
             <div className='flex flex-col text-sm'>
               <span className='text-muted-foreground'>
                 Recommanded size: 128x128px
@@ -188,9 +244,15 @@ export default function SettingsPage({
               </span>
               <span className='text-muted-foreground'>Max file size: 1MB</span>
             </div>
-            <Button className='w-full'>Update Avatar</Button>
+            <Button className='w-full' disabled={isUpdatingAvatar}>
+              {isUpdatingAvatar ? (
+                <Loader className='w-4 h-4 animate-spin' />
+              ) : (
+                'Update Avatar'
+              )}
+            </Button>
           </div>
-        </aside>
+        </Form>
       </div>
     </div>
   );

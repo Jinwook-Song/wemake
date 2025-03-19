@@ -20,3 +20,16 @@ export const updateUser = async (
 
   if (error) throw new Error(error.message);
 };
+
+export const updateUserAvatar = async (
+  client: SupaClient,
+  avatarUrl: string,
+  profileId: string,
+) => {
+  const { error } = await client
+    .from('profiles')
+    .update({ avatar: avatarUrl })
+    .eq('profile_id', profileId);
+
+  if (error) throw new Error(error.message);
+};
