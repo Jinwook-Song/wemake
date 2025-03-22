@@ -6,7 +6,13 @@ import {
   BreadcrumbSeparator,
 } from '~/common/components/ui/breadcrumb';
 import type { Route } from './+types/post-page';
-import { Form, Link, useNavigation, useOutletContext } from 'react-router';
+import {
+  Form,
+  Link,
+  useFetcher,
+  useNavigation,
+  useOutletContext,
+} from 'react-router';
 import { ChevronUpIcon, DotIcon, Loader } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -73,6 +79,7 @@ export default function PostPage({
   actionData,
 }: Route.ComponentProps) {
   const { post, replies } = loaderData;
+  const fetcher = useFetcher();
 
   const { isLoggedIn, name, avatar } = useAuth();
 
@@ -112,16 +119,22 @@ export default function PostPage({
       <div className='grid grid-cols-6 gap-40 items-start'>
         <div className='col-span-4 space-y-10'>
           <div className='w-full flex items-start gap-10'>
-            <Button
-              variant={'outline'}
-              className={cn(
-                'flex flex-col h-14',
-                post.is_upvoted && 'bg-primary text-primary-foreground',
-              )}
+            <fetcher.Form
+              method='post'
+              action={`/community/${post.post_id}/upvote`}
             >
-              <ChevronUpIcon className='size-4 shrink-0' />
-              <span>{post.upvotes}</span>
-            </Button>
+              <input type='hidden' name='postId' value={post.post_id} />
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'flex flex-col h-14',
+                  post.is_upvoted && 'bg-primary text-primary-foreground',
+                )}
+              >
+                <ChevronUpIcon className='size-4 shrink-0' />
+                <span>{post.upvotes}</span>
+              </Button>
+            </fetcher.Form>
             <div className='space-y-20 w-full'>
               <div className='space-y-2'>
                 <h2 className='text-3xl font-bold'>{post.title}</h2>
