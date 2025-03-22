@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useFetcher } from 'react-router';
 import {
   Card,
   CardFooter,
@@ -38,6 +38,18 @@ export function PostCard({
   votesCount = 0,
   isUpvoted,
 }: PostCardProps) {
+  const fetcher = useFetcher();
+  const onUpvoteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const formData = new FormData();
+    formData.append('postId', id.toString());
+    fetcher.submit(formData, {
+      method: 'post',
+      action: `/community/${id}/upvote`,
+    });
+  };
   return (
     <Link to={`/community/${id}`}>
       <Card
@@ -70,6 +82,7 @@ export function PostCard({
         {expanded && (
           <CardFooter className='flex justify-end py-0'>
             <Button
+              onClick={onUpvoteClick}
               variant={'outline'}
               className={cn(
                 'flex flex-col h-14',
