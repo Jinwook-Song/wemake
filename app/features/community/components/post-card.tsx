@@ -42,10 +42,7 @@ export function PostCard({
   const onUpvoteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const formData = new FormData();
-    formData.append('postId', id.toString());
-    fetcher.submit(formData, {
+    fetcher.submit(null, {
       method: 'post',
       action: `/community/${id}/upvote`,
     });
