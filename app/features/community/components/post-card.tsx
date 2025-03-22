@@ -39,6 +39,14 @@ export function PostCard({
   isUpvoted,
 }: PostCardProps) {
   const fetcher = useFetcher();
+  const idleState = fetcher.state === 'idle';
+  const optimisticVotesCount = idleState
+    ? votesCount
+    : isUpvoted
+    ? votesCount - 1
+    : votesCount + 1;
+  const optimisticIsUpvoted = idleState ? isUpvoted : !isUpvoted;
+
   const onUpvoteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -83,11 +91,11 @@ export function PostCard({
               variant={'outline'}
               className={cn(
                 'flex flex-col h-14',
-                isUpvoted && 'bg-primary text-primary-foreground',
+                optimisticIsUpvoted && 'bg-primary text-primary-foreground',
               )}
             >
               <ChevronUpIcon className='size-4 shrink-0' />
-              <span>{votesCount}</span>
+              <span>{optimisticVotesCount}</span>
             </Button>
           </CardFooter>
         )}
