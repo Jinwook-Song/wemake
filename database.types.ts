@@ -843,6 +843,7 @@ export type Database = {
           author_role: Database["public"]["Enums"]["role"] | null
           content: string | null
           created_at: string | null
+          is_upvoted: boolean | null
           post_id: number | null
           product_count: number | null
           replies_count: number | null
@@ -859,6 +860,7 @@ export type Database = {
           author: string | null
           avatar: string | null
           created_at: string | null
+          is_upvoted: boolean | null
           post_id: number | null
           slug: string | null
           title: string | null

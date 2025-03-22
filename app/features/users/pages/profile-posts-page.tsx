@@ -25,6 +25,7 @@ export default function ProfilePostsPage({ loaderData }: Route.ComponentProps) {
           category={post.topic}
           createdAt={post.created_at}
           expanded
+          isUpvoted={post.is_upvoted}
         />
       ))}
     </div>

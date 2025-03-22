@@ -8,7 +8,15 @@ SELECT
     pr.name AS author,
     pr.avatar AS avatar,
     pr.username AS username,
-    p.upvotes
+    p.upvotes,
+    (
+        SELECT EXISTS (
+            SELECT 1 
+            FROM public.post_upvotes pu 
+            WHERE pu.post_id = p.post_id 
+            AND pu.profile_id = auth.uid()
+        )
+    ) AS is_upvoted
 FROM
     posts p
 INNER JOIN

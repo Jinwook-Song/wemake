@@ -24,6 +24,7 @@ interface PostCardProps {
   createdAt: string;
   expanded?: boolean;
   votesCount?: number;
+  isUpvoted: boolean;
 }
 
 export function PostCard({
@@ -35,6 +36,7 @@ export function PostCard({
   createdAt,
   expanded = false,
   votesCount = 0,
+  isUpvoted,
 }: PostCardProps) {
   return (
     <Link to={`/community/${id}`}>
@@ -67,7 +69,13 @@ export function PostCard({
         )}
         {expanded && (
           <CardFooter className='flex justify-end py-0'>
-            <Button variant={'outline'} className='flex flex-col h-14'>
+            <Button
+              variant={'outline'}
+              className={cn(
+                'flex flex-col h-14',
+                isUpvoted && 'bg-primary text-primary-foreground',
+              )}
+            >
               <ChevronUpIcon className='size-4 shrink-0' />
               <span>{votesCount}</span>
             </Button>
