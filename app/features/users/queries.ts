@@ -198,3 +198,33 @@ export const getMessagesByMessageRoomId = async (
   if (messagesError) throw messagesError;
   return data;
 };
+
+export const getRoomsParticipant = async (
+  client: SupaClient,
+  { messageRoomId, userId }: { messageRoomId: number; userId: string },
+) => {
+  const { count, error } = await client
+    .from('message_room_members')
+    .select('*', { count: 'exact', head: true })
+    .eq('message_room_id', messageRoomId)
+    .eq('profile_id', userId);
+  if (error) throw error;
+
+  if (count === 0) throw new Error('Message room not found');
+
+  const { data, error: participantsError } = await client
+    .from('message_room_members')
+    .select(
+      `
+      profile:profiles!profile_id!inner(
+        name,
+        avatar
+      )
+      `,
+    )
+    .eq('message_room_id', messageRoomId)
+    .neq('profile_id', userId)
+    .single();
+  if (participantsError) throw participantsError;
+  return data;
+};

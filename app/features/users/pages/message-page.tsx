@@ -16,7 +16,11 @@ import { Button } from '~/common/components/ui/button';
 import { SendIcon } from 'lucide-react';
 import { MessageBubble } from '../components/message-bubble';
 import { makeSSRClient } from '~/supa-client';
-import { getCurrentUserId, getMessagesByMessageRoomId } from '../queries';
+import {
+  getCurrentUserId,
+  getMessagesByMessageRoomId,
+  getRoomsParticipant,
+} from '../queries';
 import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = () => {
@@ -34,22 +38,26 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     messageRoomId: parseInt(messageRoomId),
     userId,
   });
-  return { messages };
+  const participant = await getRoomsParticipant(client, {
+    messageRoomId: parseInt(messageRoomId),
+    userId,
+  });
+  return { messages, participant };
 };
 
 export default function MessagePage({ loaderData }: Route.ComponentProps) {
-  const { messages } = loaderData;
+  const { messages, participant } = loaderData;
   const { userId } = useOutletContext<{ userId: string }>();
   return (
     <div className='h-full flex flex-col relative'>
       <Card className='absolute w-full top-0 bg-card/50 z-10 backdrop-blur'>
         <CardHeader className='flex flex-row gap-4 items-center bg-transparent'>
           <Avatar className='size-14'>
-            <AvatarFallback>J</AvatarFallback>
-            <AvatarImage src='https://github.com/jinwook-song.png' />
+            <AvatarFallback>{participant?.profile?.name?.[0]}</AvatarFallback>
+            <AvatarImage src={participant?.profile?.avatar ?? ''} />
           </Avatar>
           <div className='flex flex-col'>
-            <CardTitle>John Doe</CardTitle>
+            <CardTitle>{participant?.profile?.name}</CardTitle>
             <CardDescription>2 days ago</CardDescription>
           </div>
         </CardHeader>
