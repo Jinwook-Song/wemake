@@ -11,6 +11,7 @@ import { Outlet, useOutletContext } from 'react-router';
 import { MessageCard } from '../components/message-card';
 import { makeSSRClient } from '~/supa-client';
 import { getCurrentUserId, getMessages } from '../queries';
+import { useAuth } from '~/hooks/use-auth';
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -21,7 +22,8 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
 export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
   const { messages } = loaderData;
-  const { userId } = useOutletContext<{ userId: string }>();
+  const { userId, name, avatar } = useAuth();
+
   return (
     <SidebarProvider className='max-h-[calc(100vh-14rem)] h-[calc(100vh-14rem)] min-h-full overflow-hidden'>
       <Sidebar className='pt-16' variant={'floating'}>
@@ -42,7 +44,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
         </SidebarContent>
       </Sidebar>
       <div className='h-full flex-1 overflow-y-auto'>
-        <Outlet context={{ userId }} />
+        <Outlet context={{ userId, name, avatar }} />
       </div>
     </SidebarProvider>
   );

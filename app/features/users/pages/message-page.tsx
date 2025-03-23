@@ -10,20 +10,20 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '~/common/components/ui/avatar';
-import { Form, useOutletContext } from 'react-router';
+import { Form } from 'react-router';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { SendIcon } from 'lucide-react';
 import { MessageBubble } from '../components/message-bubble';
-import { makeSSRClient } from '~/supa-client';
+import { browserClient, makeSSRClient, type Database } from '~/supa-client';
 import {
   getCurrentUserId,
   getMessagesByMessageRoomId,
   getRoomsParticipant,
 } from '../queries';
-import { useAuth } from '~/hooks/use-auth';
 import { sendMessageToRoom } from '../mutations';
-import { useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -32,6 +32,8 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
+// default: true
+export const shouldRevalidate = () => false;
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
   const userId = await getCurrentUserId(client);
@@ -40,6 +42,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     messageRoomId: parseInt(messageRoomId),
     userId,
   });
+
   const participant = await getRoomsParticipant(client, {
     messageRoomId: parseInt(messageRoomId),
     userId,
@@ -65,9 +68,34 @@ export default function MessagePage({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { messages, participant } = loaderData;
-  const { userId } = useOutletContext<{ userId: string }>();
+  const { participant } = loaderData;
+  const [messages, setMessages] = useState(loaderData.messages);
+  const { userId, name, avatar } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const changes = browserClient
+      .channel(`room:${userId}-${participant?.profile.profile_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          setMessages((prev) => [
+            ...prev,
+            payload.new as Database['public']['Tables']['messages']['Row'],
+          ]);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      changes.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className='h-full flex flex-col relative'>
@@ -87,8 +115,16 @@ export default function MessagePage({
         {messages.map((message) => (
           <MessageBubble
             key={message.message_id}
-            avatarUrl={message.sender.avatar ?? ''}
-            username={message.sender.name}
+            avatarUrl={
+              message.sender_id === userId
+                ? avatar ?? ''
+                : participant.profile.avatar ?? ''
+            }
+            username={
+              message.sender_id === userId
+                ? name ?? ''
+                : participant.profile.name
+            }
             message={message.content}
             isCurrentUser={message.sender_id === userId}
           />
