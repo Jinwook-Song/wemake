@@ -22,6 +22,8 @@ import {
   getRoomsParticipant,
 } from '../queries';
 import { useAuth } from '~/hooks/use-auth';
+import { sendMessageToRoom } from '../mutations';
+import { useRef } from 'react';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -45,9 +47,28 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return { messages, participant };
 };
 
-export default function MessagePage({ loaderData }: Route.ComponentProps) {
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const messageRoomId = params.messageRoomId;
+  const formData = await request.formData();
+  const message = formData.get('message');
+  await sendMessageToRoom(client, {
+    messageRoomId: parseInt(messageRoomId),
+    content: message as string,
+    senderId: userId,
+  });
+  return { ok: true };
+};
+
+export default function MessagePage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { messages, participant } = loaderData;
   const { userId } = useOutletContext<{ userId: string }>();
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
     <div className='h-full flex flex-col relative'>
       <Card className='absolute w-full top-0 bg-card/50 z-10 backdrop-blur'>
@@ -75,8 +96,17 @@ export default function MessagePage({ loaderData }: Route.ComponentProps) {
       </div>
       <Card className='fixed w-[calc(100%-16rem)] bottom-0 left-0 right-0 ml-auto bg-transparent hover:bg-card/50 focus-within:bg-card/50'>
         <CardHeader>
-          <Form className='relative flex justify-end items-center'>
+          <Form
+            ref={(node) => {
+              formRef.current = node;
+              if (actionData?.ok) formRef.current?.reset();
+            }}
+            method='post'
+            className='relative flex justify-end items-center'
+          >
             <Textarea
+              required
+              name='message'
               placeholder='Write a message...'
               rows={2}
               className='resize-none'

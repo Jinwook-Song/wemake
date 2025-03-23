@@ -97,3 +97,29 @@ export const sendMessage = async (
     return newRoomData.message_room_id;
   }
 };
+
+export const sendMessageToRoom = async (
+  client: SupaClient,
+  {
+    messageRoomId,
+    content,
+    senderId,
+  }: { messageRoomId: number; content: string; senderId: string },
+) => {
+  const { count, error } = await client
+    .from('message_room_members')
+    .select('*', { count: 'exact', head: true })
+    .eq('message_room_id', messageRoomId)
+    .eq('profile_id', senderId);
+  if (error) throw error;
+
+  if (count === 0) throw new Error('Message room not found');
+
+  const { error: sendMessageError } = await client.from('messages').insert({
+    message_room_id: messageRoomId,
+    sender_id: senderId,
+    content,
+  });
+
+  if (sendMessageError) throw new Error(sendMessageError.message);
+};
