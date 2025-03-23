@@ -33,3 +33,16 @@ export const updateUserAvatar = async (
 
   if (error) throw new Error(error.message);
 };
+
+export const seeNotification = async (
+  client: SupaClient,
+  { userId, notificationId }: { userId: string; notificationId: number },
+) => {
+  const { error } = await client
+    .from('notifications')
+    .update({ seen: true })
+    .eq('notification_id', notificationId)
+    .eq('target_id', userId);
+
+  if (error) throw new Error(error.message);
+};

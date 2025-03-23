@@ -23,7 +23,6 @@ export default function NotificationsPage({
   loaderData,
 }: Route.ComponentProps) {
   const { notifications } = loaderData;
-  console.log(notifications);
   return (
     <div className='space-y-20'>
       <h1 className='text-4xl font-bold'>Notifications</h1>
@@ -31,6 +30,7 @@ export default function NotificationsPage({
         {notifications.map((notification) => (
           <NotificationCard
             key={notification.notification_id}
+            notificationId={notification.notification_id}
             avatarSrc={notification.source?.avatar ?? ''}
             avatarFallback={notification.source?.name[0] ?? ''}
             username={notification.source?.name ?? ''}

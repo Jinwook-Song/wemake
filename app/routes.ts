@@ -101,6 +101,10 @@ export default [
     route('/profile', 'features/users/pages/my-profile-page.tsx'),
     route('/settings', 'features/users/pages/settings-page.tsx'),
     route('/notifications', 'features/users/pages/notifications-page.tsx'),
+    route(
+      '/notifications/:notificationId/see',
+      'features/users/pages/see-notification-page.tsx',
+    ),
     ...prefix('/messages', [
       layout('features/users/layouts/messages-layout.tsx', [
         index('features/users/pages/messages-page.tsx'),

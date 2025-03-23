@@ -13,9 +13,10 @@ import {
 import { EyeIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import type { NotificationType } from '../constant';
-import { Link } from 'react-router';
+import { Link, useFetcher } from 'react-router';
 
 interface NotificationCardProps {
+  notificationId: number;
   avatarSrc: string;
   avatarFallback: string;
   username: string;
@@ -27,7 +28,21 @@ interface NotificationCardProps {
   payloadId?: number;
 }
 
+const getMessage = (type: NotificationType) => {
+  switch (type) {
+    case 'follow':
+      return 'followed you.';
+    case 'review':
+      return 'reviewed your product: ';
+    case 'reply':
+      return 'replied to your post: ';
+    case 'mention':
+      return 'mentioned you in a post: ';
+  }
+};
+
 export function NotificationCard({
+  notificationId,
   avatarSrc,
   avatarFallback,
   username,
@@ -38,21 +53,13 @@ export function NotificationCard({
   postTitle,
   payloadId,
 }: NotificationCardProps) {
-  const getMessage = (type: NotificationType) => {
-    switch (type) {
-      case 'follow':
-        return 'followed you.';
-      case 'review':
-        return 'reviewed your product: ';
-      case 'reply':
-        return 'replied to your post: ';
-      case 'mention':
-        return 'mentioned you in a post: ';
-    }
-  };
+  const fetcher = useFetcher();
+  const optimisticSeen = fetcher.state === 'idle' ? seen : true;
 
   return (
-    <Card className={cn('min-w-[450px]', seen ? '' : 'bg-chart-3/10')}>
+    <Card
+      className={cn('min-w-[450px]', optimisticSeen ? '' : 'bg-chart-3/10')}
+    >
       <CardHeader className='flex flex-row items-start gap-5 space-y-0'>
         <Avatar>
           <AvatarFallback>{avatarFallback}</AvatarFallback>
@@ -77,10 +84,15 @@ export function NotificationCard({
         </div>
       </CardHeader>
       <CardFooter className='flex justify-end'>
-        {!seen && (
-          <Button variant='outline' size='icon'>
-            <EyeIcon className='size-4' />
-          </Button>
+        {!optimisticSeen && (
+          <fetcher.Form
+            method='post'
+            action={`/my/notifications/${notificationId}/see`}
+          >
+            <Button variant='outline' size='icon'>
+              <EyeIcon className='size-4' />
+            </Button>
+          </fetcher.Form>
         )}
       </CardFooter>
     </Card>
