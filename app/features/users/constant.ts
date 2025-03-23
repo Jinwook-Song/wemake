@@ -7,3 +7,12 @@ export const USER_ROLES = [
 ] as const;
 
 export type UserRole = (typeof USER_ROLES)[number]['value'];
+
+export const NOTIFICATION_TYPES = [
+  { label: 'Follow', value: 'follow' },
+  { label: 'Review', value: 'review' },
+  { label: 'Reply', value: 'reply' },
+  { label: 'Mention', value: 'mention' },
+] as const;
+
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]['value'];

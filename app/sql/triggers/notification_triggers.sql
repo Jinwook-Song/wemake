@@ -30,8 +30,8 @@ DECLARE
     product_owner uuid;
 BEGIN
     SELECT profile_id INTO product_owner FROM public.products WHERE product_id = NEW.product_id;
-    INSERT INTO public.notifications (type, source_id, target_id)
-    VALUES ('review', NEW.profile_id, product_owner);
+    INSERT INTO public.notifications (type, source_id, target_id, product_id)
+    VALUES ('review', NEW.profile_id, product_owner, NEW.product_id);
     RETURN NEW;
 END;
 $$;
@@ -51,8 +51,8 @@ DECLARE
     post_owner uuid;
 BEGIN
     SELECT profile_id INTO post_owner FROM public.posts WHERE post_id = NEW.post_id;
-    INSERT INTO public.notifications (type, source_id, target_id)
-    VALUES ('reply', NEW.profile_id, post_owner);
+    INSERT INTO public.notifications (type, source_id, target_id, post_id)
+    VALUES ('reply', NEW.profile_id, post_owner, NEW.post_id);
     RETURN NEW;
 END;
 $$;

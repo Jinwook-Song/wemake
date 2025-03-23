@@ -1,5 +1,9 @@
 import type { Route } from './+types/notifications-page';
 import { NotificationCard } from '../components/notification-card';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId, getNotifications } from '../queries';
+import { DateTime } from 'luxon';
+import type { NotificationType } from '../constant';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -8,27 +12,38 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function NotificationsPage({}: Route.ComponentProps) {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const notifications = await getNotifications(client, { userId });
+  return { notifications };
+};
+
+export default function NotificationsPage({
+  loaderData,
+}: Route.ComponentProps) {
+  const { notifications } = loaderData;
+  console.log(notifications);
   return (
     <div className='space-y-20'>
       <h1 className='text-4xl font-bold'>Notifications</h1>
       <div className='flex flex-col items-start gap-5'>
-        <NotificationCard
-          avatarSrc='https://github.com/deepseek-ai.png'
-          avatarFallback='D'
-          actorName='DeepSeek'
-          action=' followed you.'
-          timestamp='2 days ago'
-          seen={true}
-        />
-        <NotificationCard
-          avatarSrc='https://github.com/deepseek-ai.png'
-          avatarFallback='D'
-          actorName='DeepSeek'
-          action=' followed you.'
-          timestamp='2 days ago'
-          seen={false}
-        />
+        {notifications.map((notification) => (
+          <NotificationCard
+            key={notification.notification_id}
+            avatarSrc={notification.source?.avatar ?? ''}
+            avatarFallback={notification.source?.name[0] ?? ''}
+            username={notification.source?.name ?? ''}
+            type={notification.type as NotificationType}
+            productName={notification.product?.name ?? ''}
+            postTitle={notification.post?.title ?? ''}
+            payloadId={
+              notification.product?.product_id ?? notification.post?.post_id
+            }
+            timestamp={DateTime.fromISO(notification.created_at).toRelative()!}
+            seen={notification.seen}
+          />
+        ))}
       </div>
     </div>
   );
