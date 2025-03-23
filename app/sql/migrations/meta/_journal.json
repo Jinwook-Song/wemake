@@ -141,6 +141,20 @@
       "when": 1742383997023,
       "tag": "0019_far_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1742696041078,
+      "tag": "0020_tearful_wonder_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1742696181615,
+      "tag": "0021_far_junta",
+      "breakpoints": true
     }
   ]
 }
