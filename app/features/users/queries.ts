@@ -152,3 +152,16 @@ export const getNotificationsCount = async (
 
   return count ?? 0;
 };
+
+export const getMessages = async (
+  client: SupaClient,
+  { userId }: { userId: string },
+) => {
+  const { data, error } = await client
+    .from('messages_view')
+    .select('*')
+    .eq('profile_id', userId)
+    .neq('other_profile_id', userId);
+  if (error) throw error;
+  return data;
+};

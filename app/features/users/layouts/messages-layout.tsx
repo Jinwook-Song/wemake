@@ -9,21 +9,31 @@ import type { Route } from './+types/messages-layout';
 import { Outlet } from 'react-router';
 
 import { MessageCard } from '../components/message-card';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId, getMessages } from '../queries';
 
-export default function MessagesLayout({}: Route.ComponentProps) {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const messages = await getMessages(client, { userId });
+  return { messages };
+};
+
+export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
+  const { messages } = loaderData;
   return (
     <SidebarProvider className='max-h-[calc(100vh-14rem)] h-[calc(100vh-14rem)] min-h-full overflow-hidden'>
       <Sidebar className='pt-16' variant={'floating'}>
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
-              {Array.from({ length: 30 }).map((_, index) => (
+              {messages.map((message) => (
                 <MessageCard
-                  key={index}
-                  id={index.toString()}
-                  avatarUrl='https://github.com/jinwook-song.png'
-                  username={`John Doe ${index}`}
-                  lastMessage='Last message'
+                  key={message.message_room_id}
+                  id={message.message_room_id}
+                  avatarUrl={message.avatar}
+                  username={message.name}
+                  lastMessage={message.last_message}
                 />
               ))}
             </SidebarMenu>

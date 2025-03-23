@@ -11,7 +11,7 @@ import {
 import { cn } from '~/lib/utils';
 
 interface MessageCardProps {
-  id: string;
+  id: number;
   avatarUrl: string;
   username: string;
   lastMessage: string;
