@@ -7,6 +7,7 @@ import { useOutletContext } from 'react-router';
 export const useAuth = () => {
   return useOutletContext<{
     isLoggedIn: boolean;
+    userId?: string;
     name?: string;
     username?: string;
     avatar?: string;

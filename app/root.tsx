@@ -95,6 +95,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       <Outlet
         context={{
           isLoggedIn,
+          userId: user?.id,
           name: profile?.name,
           username: profile?.username,
           avatar: profile?.avatar,

@@ -10,11 +10,14 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '~/common/components/ui/avatar';
-import { Form } from 'react-router';
+import { Form, useOutletContext } from 'react-router';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { SendIcon } from 'lucide-react';
 import { MessageBubble } from '../components/message-bubble';
+import { makeSSRClient } from '~/supa-client';
+import { getCurrentUserId, getMessagesByMessageRoomId } from '../queries';
+import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -23,7 +26,20 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function MessagePage({}: Route.ComponentProps) {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getCurrentUserId(client);
+  const messageRoomId = params.messageRoomId;
+  const messages = await getMessagesByMessageRoomId(client, {
+    messageRoomId: parseInt(messageRoomId),
+    userId,
+  });
+  return { messages };
+};
+
+export default function MessagePage({ loaderData }: Route.ComponentProps) {
+  const { messages } = loaderData;
+  const { userId } = useOutletContext<{ userId: string }>();
   return (
     <div className='h-full flex flex-col relative'>
       <Card className='absolute w-full top-0 bg-card/50 z-10 backdrop-blur'>
@@ -39,13 +55,13 @@ export default function MessagePage({}: Route.ComponentProps) {
         </CardHeader>
       </Card>
       <div className='overflow-y-auto pt-10 flex flex-col gap-4 grow mt-20'>
-        {Array.from({ length: 19 }).map((_, index) => (
+        {messages.map((message) => (
           <MessageBubble
-            key={index}
-            avatarUrl='https://github.com/jinwook-song.png'
-            username='John Doe'
-            message='This is a longer message from John Doe discussing various topics and sharing updates about their day. Hope you are doing well!'
-            isCurrentUser={index % 2 === 0}
+            key={message.message_id}
+            avatarUrl={message.sender.avatar ?? ''}
+            username={message.sender.name}
+            message={message.content}
+            isCurrentUser={message.sender_id === userId}
           />
         ))}
       </div>

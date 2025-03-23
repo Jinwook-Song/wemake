@@ -165,3 +165,36 @@ export const getMessages = async (
   if (error) throw error;
   return data;
 };
+
+export const getMessagesByMessageRoomId = async (
+  client: SupaClient,
+  { messageRoomId, userId }: { messageRoomId: number; userId: string },
+) => {
+  const { count, error } = await client
+    .from('message_room_members')
+    .select('*', { count: 'exact', head: true })
+    .eq('message_room_id', messageRoomId)
+    .eq('profile_id', userId);
+  if (error) throw error;
+
+  if (count === 0) throw new Error('Message room not found');
+
+  const { data, error: messagesError } = await client
+    .from('messages')
+    .select(
+      `
+      *,
+      sender:profiles!sender_id!inner(
+        name,
+        profile_id,
+        avatar
+      )
+    
+    `,
+    )
+    .eq('message_room_id', messageRoomId)
+    .order('created_at', { ascending: true });
+
+  if (messagesError) throw messagesError;
+  return data;
+};
