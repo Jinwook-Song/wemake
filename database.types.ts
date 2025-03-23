@@ -283,24 +283,24 @@ export type Database = {
           content: string
           created_at: string
           message_id: number
-          message_room_id: number | null
-          sender_id: string | null
+          message_room_id: number
+          sender_id: string
           updated_at: string
         }
         Insert: {
           content: string
           created_at?: string
           message_id?: never
-          message_room_id?: number | null
-          sender_id?: string | null
+          message_room_id: number
+          sender_id: string
           updated_at?: string
         }
         Update: {
           content?: string
           created_at?: string
           message_id?: never
-          message_room_id?: number | null
-          sender_id?: string | null
+          message_room_id?: number
+          sender_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -919,6 +919,15 @@ export type Database = {
           views: number
           visits: number
           month: string
+        }[]
+      }
+      get_room: {
+        Args: {
+          from_user_id: string
+          to_user_id: string
+        }
+        Returns: {
+          message_room_id: number
         }[]
       }
       track_event: {

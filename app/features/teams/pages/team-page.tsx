@@ -107,10 +107,14 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
               <Badge variant={'secondary'}>{team.team_leader.role}</Badge>
             </div>
           </div>
-          <Form className='space-y-5'>
+          <Form
+            method='post'
+            action={`/users/${team.team_leader.username}/messages`}
+            className='space-y-5'
+          >
             <InputPair
-              id='introduction'
-              name='introduction'
+              id='content'
+              name='content'
               label='Introduction yourself'
               description='Tell us about yourself'
               placeholder='i.e I am a product manager'
