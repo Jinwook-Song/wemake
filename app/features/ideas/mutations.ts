@@ -7,7 +7,7 @@ export const claimIdea = async (
   const { error } = await client
     .from('gpt_ideas')
     .update({ claimed_by: userId, claimed_at: new Date().toISOString() })
-    .eq('gpt_idea_id', ideaId);
+    .eq('gpt_idea_id', +ideaId);
 
   if (error) throw error;
 };

@@ -68,7 +68,7 @@ export const getJobById = async (
       )
       `,
     )
-    .eq('job_id', jobId)
+    .eq('job_id', +jobId)
     .single();
 
   if (error) throw error;

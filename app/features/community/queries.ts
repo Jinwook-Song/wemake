@@ -66,7 +66,7 @@ export const getPostById = async (
   const { data, error } = await client
     .from('community_post_detail_view')
     .select('*')
-    .eq('post_id', postId)
+    .eq('post_id', +postId)
     .single();
   if (error) throw new Error(error.message);
   return data;
@@ -100,7 +100,7 @@ export const getPostReplies = async (
       )
     `,
     )
-    .eq('post_id', postId)
+    .eq('post_id', +postId)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;

@@ -155,7 +155,7 @@ export const getProductById = async (
   const { data, error } = await client
     .from('product_overview_view')
     .select('*')
-    .eq('product_id', productId)
+    .eq('product_id', +productId)
     .single();
 
   if (error) throw error;
@@ -182,7 +182,7 @@ export const getProductReviews = async (
       )
       `,
     )
-    .eq('product_id', productId)
+    .eq('product_id', +productId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;

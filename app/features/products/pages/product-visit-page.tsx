@@ -10,7 +10,7 @@ export const loader = async ({
   const { data, error } = await client
     .from('products')
     .select('url')
-    .eq('product_id', productId)
+    .eq('product_id', +productId)
     .single();
   if (error) throw new Error(error.message);
 

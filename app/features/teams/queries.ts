@@ -38,7 +38,7 @@ export const getTeamById = async (
       )
     `,
     )
-    .eq('team_id', teamId)
+    .eq('team_id', +teamId)
     .single();
   if (error) throw error;
   return data;

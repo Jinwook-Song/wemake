@@ -186,9 +186,9 @@ export default function PostPage({
                 <div className='flex flex-col gap-5'>
                   {replies.map((reply) => (
                     <Reply
-                      name={reply.user.name}
-                      username={reply.user.username}
-                      avatarUrl={reply.user.avatar}
+                      name={reply.user!.name}
+                      username={reply.user!.username}
+                      avatarUrl={reply.user!.avatar}
                       content={reply.reply}
                       createdAt={reply.created_at}
                       topLevel={true}
