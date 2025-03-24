@@ -6,7 +6,7 @@ import {
 } from '@supabase/ssr';
 import type { MergeDeep, SetNonNullable, SetFieldType } from 'type-fest';
 import type { Database as SupabaseDatabase } from 'database.types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 export type Database = MergeDeep<
   SupabaseDatabase,
@@ -81,3 +81,8 @@ export const makeSSRClient = (request: Request) => {
 };
 
 export type SupaClient = SupabaseClient<Database>;
+
+export const adminClient = createClient<Database>(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
