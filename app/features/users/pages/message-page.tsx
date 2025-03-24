@@ -22,7 +22,7 @@ import {
   getRoomsParticipant,
 } from '../queries';
 import { sendMessageToRoom } from '../mutations';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '~/hooks/use-auth';
 
 export const meta: Route.MetaFunction = () => {
