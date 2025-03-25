@@ -120,5 +120,6 @@ export default [
       route('/posts', 'features/users/pages/profile-posts-page.tsx'),
     ]),
     route('/messages', 'features/users/pages/send-message-page.tsx'),
+    route('/api/welcome', 'features/users/api/welcome-user.tsx'),
   ]),
 ] satisfies RouteConfig;

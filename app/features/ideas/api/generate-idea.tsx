@@ -3,6 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { insertIdeas } from '../mutations';
 import { adminClient } from '~/supa-client';
+import type { Route } from './+types/generate-idea';
 const openai = new OpenAI();
 
 const IdeaSchema = z.object({
@@ -25,7 +26,14 @@ const IdeaSchema = z.object({
 
 const ResponseSchema = z.object({ ideas: z.array(IdeaSchema) });
 
-export const loader = async () => {
+export const action = async ({ request }: Route.ActionArgs) => {
+  if (request.method !== 'POST') return new Response(null, { status: 404 });
+
+  const header = request.headers.get(process.env.HEADER_KEY!);
+  if (header !== process.env.HEADER_VALUE) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
