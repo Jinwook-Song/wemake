@@ -618,6 +618,7 @@ export type Database = {
           description: string
           how_it_works: string
           icon: string
+          is_promoted: boolean
           name: string
           product_id: number
           profile_id: string
@@ -632,6 +633,7 @@ export type Database = {
           description: string
           how_it_works: string
           icon: string
+          is_promoted?: boolean
           name: string
           product_id?: never
           profile_id: string
@@ -646,6 +648,7 @@ export type Database = {
           description?: string
           how_it_works?: string
           icon?: string
+          is_promoted?: boolean
           name?: string
           product_id?: never
           profile_id?: string

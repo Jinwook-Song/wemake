@@ -8,6 +8,7 @@ import {
   primaryKey,
   integer,
   foreignKey,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { profiles } from '../users/schema';
 import { check } from 'drizzle-orm/mysql-core';
@@ -20,6 +21,7 @@ export const products = pgTable(
       .primaryKey()
       .generatedAlwaysAsIdentity(),
     name: text().notNull(),
+    is_promoted: boolean().notNull().default(false),
     tagline: text().notNull(),
     description: text().notNull(),
     how_it_works: text().notNull(),
