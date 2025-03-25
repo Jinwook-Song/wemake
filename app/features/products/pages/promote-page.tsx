@@ -1,6 +1,5 @@
 import { Hero } from '~/common/components/hero';
 import type { Route } from './+types/promote-page';
-import { Form } from 'react-router';
 import { SelectPair } from '~/common/components/select-pair';
 import { Calendar } from '~/common/components/ui/calendar';
 import { Label } from '~/common/components/ui/label';
@@ -13,6 +12,8 @@ import {
   type TossPaymentsWidgets,
 } from '@tosspayments/tosspayments-sdk';
 import { useAuth } from '~/hooks/use-auth';
+import { PROMOTE_PRODUCT_PRICE } from '../constants';
+
 export const meta: Route.MetaFunction = () => {
   return [
     { title: 'Promote Product | Product Hunt Clone' },
@@ -33,10 +34,12 @@ export default function PromotePage() {
       : 0;
 
   const widgets = useRef<TossPaymentsWidgets | null>(null);
+  const initedToss = useRef(false);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || initedToss.current) return;
     const initToss = async () => {
+      initedToss.current = true;
       const toss = await loadTossPayments(
         'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm',
       );
@@ -59,12 +62,38 @@ export default function PromotePage() {
   }, [userId]);
 
   useEffect(() => {
-    if (!widgets.current) return;
-    widgets.current.setAmount({
-      value: totalDays * 20,
-      currency: 'KRW',
-    });
+    const updateAmount = async () => {
+      if (!widgets.current) return;
+      widgets.current.setAmount({
+        value: totalDays * PROMOTE_PRODUCT_PRICE,
+        currency: 'KRW',
+      });
+    };
+    updateAmount();
   }, [promotionPeriod]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const product = formData.get('product');
+    console.log(product, promotionPeriod);
+    if (!product || !promotionPeriod?.from || !promotionPeriod?.to) return;
+
+    await widgets.current?.requestPayment({
+      orderId: crypto.randomUUID(),
+      orderName: `WeMake Promotion`,
+      customerEmail: 'wlsdnr129@naver.com',
+      customerName: 'Jw song',
+      customerMobilePhone: '01012345678',
+      metadata: {
+        product,
+        promotionFrom: DateTime.fromJSDate(promotionPeriod.from).toISO(),
+        promotionTo: DateTime.fromJSDate(promotionPeriod.to).toISO(),
+      },
+      successUrl: `${window.location.href}/success`,
+      failUrl: `${window.location.href}/fail`,
+    });
+  };
 
   return (
     <div>
@@ -72,8 +101,8 @@ export default function PromotePage() {
         title='Promote Your Product'
         description='Boost your product with our promotion service.'
       />
-      <div className='grid grid-cols-6 gap-10'>
-        <Form className='col-span-3 w-1/2 max-w-md mx-auto flex flex-col gap-10 items-center'>
+      <form onSubmit={handleSubmit} className='grid grid-cols-6 gap-10'>
+        <div className='col-span-3 w-1/2 max-w-md mx-auto flex flex-col gap-10 items-center'>
           <SelectPair
             label='Select a product'
             description='Select a product to promote'
@@ -111,7 +140,7 @@ export default function PromotePage() {
               disabled={{ before: new Date() }}
             />
           </div>
-        </Form>
+        </div>
         <div className='col-span-3 px-20 flex flex-col items-center gap-4'>
           <div
             id='toss-payment-methods'
@@ -121,16 +150,16 @@ export default function PromotePage() {
             id='toss-payment-agreement'
             className='w-full rounded-md overflow-hidden'
           />
-          <Button disabled={totalDays < 3} className='w-full'>
+          <Button disabled={totalDays === 0} className='w-full'>
             Go to checkout (
-            {(totalDays * 20_000).toLocaleString('ko-KR', {
+            {(totalDays * PROMOTE_PRODUCT_PRICE).toLocaleString('ko-KR', {
               style: 'currency',
               currency: 'KRW',
             })}
             )
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
