@@ -10,6 +10,15 @@ import { renderToPipeableStream } from 'react-dom/server';
 import * as Sentry from '@sentry/node';
 import { type HandleErrorFunction } from 'react-router';
 
+export const handleError: HandleErrorFunction = (error, { request }) => {
+  // React Router may abort some interrupted requests, report those
+  if (!request.signal.aborted) {
+    Sentry.captureException(error);
+    // make sure to still log the error so you can see it
+    console.error(error);
+  }
+};
+
 export const streamTimeout = 5_000;
 
 export default function handleRequest(
@@ -71,12 +80,3 @@ export default function handleRequest(
     setTimeout(abort, streamTimeout + 1000);
   });
 }
-
-export const handleError: HandleErrorFunction = (error, { request }) => {
-  // React Router may abort some interrupted requests, report those
-  if (!request.signal.aborted) {
-    Sentry.captureException(error);
-    // make sure to still log the error so you can see it
-    console.error(error);
-  }
-};
