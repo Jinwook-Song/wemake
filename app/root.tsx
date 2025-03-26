@@ -16,6 +16,7 @@ import { Settings } from 'luxon';
 import { cn } from './lib/utils';
 import { makeSSRClient } from './supa-client';
 import { getNotificationsCount, getUserById } from './features/users/queries';
+import * as Sentry from '@sentry/react-router';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -116,7 +117,13 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? 'The requested page could not be found.'
         : error.statusText || details;
+
+    if (error.status !== 404) {
+      Sentry.captureException(error);
+    }
   } else if (import.meta.env.DEV && error && error instanceof Error) {
+    Sentry.captureException(error);
+
     details = error.message;
     stack = error.stack;
   }

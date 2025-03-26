@@ -22,6 +22,8 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
+  throw new Error('some error thrown in a loader');
+
   const { client, headers } = makeSSRClient(request);
 
   const products = await getProductsByDateRnage(client, {
