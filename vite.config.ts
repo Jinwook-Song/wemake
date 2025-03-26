@@ -16,15 +16,18 @@ const sentryConfig: SentryReactRouterBuildOptions = {
     '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',
 };
 
-export default defineConfig((config) => ({
-  css: {
-    postcss: {
-      plugins: [tailwindcss, autoprefixer],
+export default defineConfig((config) => {
+  return {
+    css: {
+      postcss: {
+        plugins: [tailwindcss, autoprefixer],
+      },
     },
-  },
-  plugins: [
-    reactRouter(),
-    tsconfigPaths(),
-    sentryReactRouter(sentryConfig, config),
-  ],
-}));
+    plugins: [
+      reactRouter(),
+      tsconfigPaths(),
+      sentryReactRouter(sentryConfig, config),
+    ],
+    sentryConfig,
+  };
+});
