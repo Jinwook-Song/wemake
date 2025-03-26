@@ -47,6 +47,8 @@ export type Database = MergeDeep<
   }
 >;
 
+export type SupaClient = SupabaseClient<Database>;
+
 export const browserClient = createBrowserClient<Database>(
   'https://vaararotbnjtiyihekkj.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhYXJhcm90Ym5qdGl5aWhla2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkxODI4MTMsImV4cCI6MjA1NDc1ODgxM30.Dj3dDsbjjyhn3eXuhiG9SWtSDj86UtM-dKZfN0Bhb-8',
@@ -79,8 +81,6 @@ export const makeSSRClient = (request: Request) => {
     headers,
   };
 };
-
-export type SupaClient = SupabaseClient<Database>;
 
 export const adminClient = createClient<Database>(
   process.env.SUPABASE_URL!,

@@ -614,7 +614,10 @@
     "basename": "/",
     "buildDirectory": "/Users/jinwooksong/repository/mine/web/wemake/build",
     "future": {
-      "unstable_optimizeDeps": false
+      "unstable_middleware": false,
+      "unstable_optimizeDeps": false,
+      "unstable_splitRouteModules": false,
+      "unstable_viteEnvironmentApi": false
     },
     "routes": {
       "root": {
