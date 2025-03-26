@@ -12,7 +12,7 @@ const sentryConfig: SentryReactRouterBuildOptions = {
   org: 'jinwook',
   project: 'wemake',
   // An auth token is required for uploading source maps.
-  authToken: import.meta.env.SENTRY_AUTH_TOKEN,
+  authToken: import.meta.env.SENTRY_AUTH_TOKEN ?? '',
   // ...
 };
 
